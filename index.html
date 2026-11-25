@@ -74,21 +74,23 @@ h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2}
     <h1>I Pee Infringement<small>The Game</small></h1>
     <p class="tag">Blast crates, drones and big silly bosses. Grab coins, bank them at home, gear up.</p>
     <p><span class="coins"><i></i><b class="coin-n">0</b></span> <span style="color:var(--muted)">banked</span></p>
-    <div class="row"><button type="button" class="btn main" id="m-play">Play</button><button type="button" class="btn" id="m-shop">Customize</button><button type="button" class="btn" id="m-scores">High scores</button><button type="button" class="btn" id="m-music">Music on</button></div>
+    <div class="row"><button type="button" class="btn main" id="m-play">Play Endless Mode</button><button type="button" class="btn" id="m-story" disabled style="opacity:.55;cursor:not-allowed" title="Coming soon">Story Mode: Coming Soon</button></div>
+    <div class="row"><button type="button" class="btn" id="m-shop">Upgrades</button><button type="button" class="btn" id="m-scores">High scores</button><button type="button" class="btn" id="m-music">Music on</button></div>
     <p style="margin:0"><button type="button" class="mini" id="m-reset" style="opacity:.7">Reset saved game</button></p>
     <ul>
       <li><kbd>W A S D</kbd> move &nbsp; <kbd>mouse</kbd> aim &nbsp; <kbd>click</kbd> / <kbd>space</kbd> shoot</li>
       <li>Walk to your house to bank the coins you carry</li>
-      <li><kbd>E</kbd> at your house: customize and upgrade</li>
+      <li><kbd>E</kbd> at your house: upgrades</li>
       <li>Shoot buildings to crumble them &nbsp; <kbd>Esc</kbd> end the round</li>
       <li>Knocked out = you drop half the coins you carry</li>
+      <li><kbd>M</kbd> music on/off &nbsp; <kbd>N</kbd> sound effects on/off</li>
     </ul>
   </div>
 </div>
 <div id="hiscore" hidden role="dialog" aria-modal="true" aria-labelledby="hs-title"><div class="hs-in"><h2 id="hs-title">High scores</h2><p class="hs-last" id="hs-last"></p><table><thead><tr><th>#</th><th>Score</th><th>Coins</th><th>Kills</th><th>Bosses</th><th>Date</th></tr></thead><tbody id="hs-body"></tbody></table><p style="text-align:right;margin:12px 0 0"><button type="button" class="btn" id="hs-close">Close</button></p></div></div>
 <div class="shop" id="shop" hidden role="dialog" aria-modal="true" aria-labelledby="shop-title">
   <div class="shop-in">
-    <header><h2 id="shop-title">Customize your bot</h2><span class="coins"><i></i><b class="coin-n">0</b></span><button type="button" class="btn" id="shop-close">Done</button></header>
+    <header><h2 id="shop-title">Upgrades</h2><span class="coins"><i></i><b class="coin-n">0</b></span><button type="button" class="btn" id="shop-close">Done</button></header>
     <div class="shop-body">
       <div class="shop-prev"><canvas id="shop-cv" width="112" height="112" aria-label="Preview"></canvas>
         <p class="hint">Hover an item to try it on. Click to buy or switch. Gear you buy is yours for keeps.</p>
@@ -114,18 +116,19 @@ const SHOP = {
   idle: {label: "On a break", all: true, items: [["lift", "Lifting weights", 80], ["fish", "Fishing", 90], ["guitar", "Guitar", 100], ["coffee", "Coffee break", 50], ["plant", "Watering a plant", 50], ["juggle", "Juggling", 50], ["nap", "Napping", 50], ["dance", "Dancing", 80], ["read", "Reading a book", 80], ["game", "Handheld game", 100]]},
   work: {label: "While working", all: true, items: [["dig", "Digging a hole", 70], ["weld", "Welding", 70], ["drill", "Jackhammer", 80], ["button", "Big red button", 60], ["type", "Typing at a console", 60], ["scan", "Scanning film", 60], ["hammer", "Hammering the anvil", 60]]},
   gun: {label: "Blaster", all: false, items: [["blaster", "Blaster", 0], ["rapid", "Rapid fire", 500], ["spread", "Triple shot", 500], ["laser", "Laser (goes through crates)", 500], ["flame", "Flamethrower", 500], ["zap", "Chain lightning (hits 2)", 500], ["grenade", "Grenade launcher", 500]]},
-  pet: {label: "Pet (fetches coins for you; the bar shows how fast)", all: false, items: [["none", "No pet", 0], ["slime", "Slime", 100], ["cat", "Cat", 180], ["drone", "Mini drone", 280], ["dog", "Dog", 400], ["falcon", "Falcon", 600]]},
+  pet: {label: "Pet (fetches coins for you; the bar shows how fast)", all: false, items: [["none", "No pet", 0], ["slime", "Slime", 150], ["cat", "Cat", 400], ["drone", "Mini drone", 800], ["dog", "Dog", 1500], ["falcon", "Falcon", 3000]]},
   flag: {label: "Flag (he waves it at your stage when it is your turn)", all: false, items: [["none", "No flag", 0], ["checker", "Checkered", 40], ["rainbow", "Rainbow", 60], ["heart", "Heart", 60], ["pirate", "Pirate", 90]]},
 };
 const BASE_EXTRA = {color: "base", gun: "blaster", pet: "none", flag: "none"};
 const GAMEKEY = "bot-blaster-v1";
 var game = {on: false}, lastWaitK = null;
 function cleanWallet(v) {
-  const w = {coins: 0, carry: 0, owned: [], looks: {}, best: 0, t: 0, scores: [], gunLv: {}};
+  const w = {coins: 0, carry: 0, owned: [], looks: {}, best: 0, t: 0, scores: [], gunLv: {}, helperLv: 0};
   if (!v || typeof v !== "object") return w;
   w.coins = Math.max(0, Math.floor(Number(v.coins) || 0)); w.carry = Math.max(0, Math.floor(Number(v.carry) || 0)); w.best = Math.max(0, Math.floor(Number(v.best) || 0)); w.t = Number(v.t) || 0;
   w.owned = Array.isArray(v.owned) ? v.owned.filter(s => typeof s === "string" && s.length < 60) : [];
   w.scores = Array.isArray(v.scores) ? v.scores.filter(r => r && typeof r === "object").map(r => ({s: Math.max(0, Math.floor(Number(r.s) || 0)), c: Math.max(0, Math.floor(Number(r.c) || 0)), k: r.k === undefined ? null : Math.max(0, Math.floor(Number(r.k) || 0)), b: r.b === undefined ? null : Math.max(0, Math.floor(Number(r.b) || 0)), d: Number(r.d) || 0})).sort((a, b) => b.s - a.s).slice(0, 10) : [];
+  w.helperLv = Math.max(0, Math.min(20, Math.floor(Number(v.helperLv) || 0)));
   w.gunLv = {}; if (v.gunLv && typeof v.gunLv === "object") Object.keys(v.gunLv).forEach(k => { if (/^[a-z]{2,12}$/.test(k)) w.gunLv[k] = Math.max(0, Math.min(4, Math.floor(Number(v.gunLv[k]) || 0))); });
   const L = v.looks && typeof v.looks === "object" ? v.looks : {};
   Object.keys(DEFAULT_LOOK).forEach(id => { const src = L[id] && typeof L[id] === "object" ? L[id] : {}, out = {};
@@ -206,6 +209,32 @@ function paintBot(g, id, mode, f, left, lkIn) {
 const gcv = $("game"), gx = gcv.getContext("2d"), sprite = document.createElement("canvas"), petCv = document.createElement("canvas");
 sprite.width = 28; sprite.height = 26; petCv.width = 16; petCv.height = 16;
 const GUNS = {blaster: {cool: .3, n: 1, spread: 0, col: "#ffc857", len: 26}, rapid: {cool: .17, n: 1, spread: .06, col: "#ff9d5c", len: 30}, spread: {cool: .38, n: 3, spread: .22, col: "#ff8fb8", len: 24}, laser: {cool: .45, beam: true, col: "#4fe3ff", len: 34}, flame: {cool: .09, flame: true, col: "#ff9d5c", len: 22}, grenade: {cool: .75, grenade: true, col: "#5f8f3a", len: 26}, zap: {cool: .55, zap: true, col: "#9be7ff", len: 28}};
+/* ---------- generated sound effects (2026-11-25): no files, built live with WebAudio. N = sound effects on/off (remembered). ---------- */
+const SFX = (() => {
+  let ac = null, on = true; const last = {};
+  try { on = localStorage.getItem("bot-blaster-sfx") !== "off"; } catch (e) {}
+  const ctx = () => { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state === "suspended") ac.resume(); return ac; };
+  const tone = (a, f0, f1, dur, type, vol, delay) => { const t = a.currentTime + (delay || 0), o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + .02); };
+  const noise = (a, dur, vol, freq, kind, delay) => { const t = a.currentTime + (delay || 0), n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(); s.buffer = buf; f.type = kind || "lowpass"; f.frequency.value = freq; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); s.connect(f); f.connect(g); g.connect(a.destination); s.start(t); };
+  const DEF = {
+    shoot: a => tone(a, 900, 220, .09, "square", .07), laser: a => tone(a, 1500, 500, .12, "sine", .1), zap: a => { tone(a, 1800, 300, .14, "sawtooth", .07); noise(a, .1, .08, 3000, "highpass"); },
+    flame: a => noise(a, .1, .07, 1400, "lowpass"), thump: a => { tone(a, 160, 45, .18, "sine", .22); noise(a, .06, .08, 900); },
+    hit: a => tone(a, 320, 140, .05, "square", .06), kill: a => { noise(a, .22, .14, 1800); tone(a, 220, 50, .2, "sawtooth", .08); },
+    boom: a => { noise(a, .8, .3, 800); tone(a, 100, 22, .7, "sine", .3); }, coin: a => { tone(a, 1250, 1250, .05, "square", .05); tone(a, 1900, 1900, .1, "square", .05, .05); },
+    hurt: a => { tone(a, 420, 70, .32, "sawtooth", .16); noise(a, .15, .1, 600); }, crate: a => { noise(a, .1, .12, 900, "highpass"); tone(a, 190, 90, .08, "square", .06); },
+    enemy: a => tone(a, 520, 260, .09, "triangle", .04), warn: a => { for (let i = 0; i < 3; i++) tone(a, 500, 950, .28, "sawtooth", .08, i * .32); },
+    buy: a => { [660, 880, 1320].forEach((f, i) => tone(a, f, f, .09, "square", .06, i * .07)); }, up: a => { [440, 554, 659, 880].forEach((f, i) => tone(a, f, f, .1, "triangle", .1, i * .06)); },
+    charge: a => { tone(a, 150, 1400, 2, "sawtooth", .06); tone(a, 75, 700, 2, "sine", .1); }, spartan: a => { noise(a, .9, .3, 2500); tone(a, 1000, 60, .8, "sawtooth", .2); tone(a, 70, 25, .9, "sine", .3); },
+    twerk: a => { for (let i = 0; i < 6; i++) tone(a, 130, 90, .07, "sine", .14, i * .09); }, ko: a => { [400, 330, 260, 180].forEach((f, i) => tone(a, f, f * .9, .22, "square", .1, i * .2)); }
+  };
+  const GAP = {shoot: 45, hit: 35, enemy: 70, kill: 30, coin: 40, flame: 70, zap: 60, laser: 50, crate: 40};
+  return {
+    play(name) { if (!on) return; const now = performance.now(); if (last[name] && now - last[name] < (GAP[name] || 25)) return; last[name] = now; const a = ctx(); if (a && DEF[name]) { try { DEF[name](a); } catch (e) {} } },
+    toggle() { on = !on; try { localStorage.setItem("bot-blaster-sfx", on ? "on" : "off"); } catch (e) {} if (on) this.play("buy"); return on; }, get on() { return on; }
+  };
+})();
 const keys = {}, mouse = {x: 0, y: 0, down: false};
 const OFF = {x: 33, y: 39};                     // the robot's middle inside his 84x78 walker canvas
 let walletDoc = null, walletBusy = false, walletDirty = false, walletTimer = 0;
@@ -242,7 +271,7 @@ function findSpot(minD, blank) {
   const sr = scroller.getBoundingClientRect(), ir = innerRect();
   for (let i = 0; i < 40; i++) {
     const sx = sr.left + 40 + Math.random() * (sr.width - 80), sy = sr.top + 40 + Math.random() * (sr.height - 80), x = sx - ir.left, y = sy - ir.top;
-    if (Math.hypot(x - game.x, y - game.y) < minD) continue;
+    if (Math.hypot(x - game.x, y - game.y) < minD || x < WORLD.wall + 40 || y < WORLD.wall + 40 || x > WORLD.w - WORLD.wall - 40 || y > WORLD.h - WORLD.wall - 40) continue;
     if (game.boxes.some(b => Math.hypot(b.x - x, b.y - y) < 70) || game.ups.some(u => Math.hypot(u.x - x, u.y - y) < 90)) continue;
     if (blank && !isBlank(sx, sy, 46)) continue;
     return {x, y};
@@ -256,19 +285,40 @@ function spawnBox() { const p = findSpot(140, true); if (!p) return; const gold 
    Your shots chip pieces out of the stage cards they fly over; every card is restored when the round ends.
    Gun upgrades pop up now and then with a price in carried coins; they last this round only (buy for keeps in Customize). */
 const UPS = {rapid: ["Rapid fire", 12], spread: ["Triple shot", 18], laser: ["Laser", 25], flame: ["Flamethrower", 20], zap: ["Chain lightning", 24], grenade: ["Grenades", 26]};
+/* Enemy roster (2026-11-25): new robot types unlock as you beat bosses (bossKills). hp = base health; they all get +1 hp every 80 kills. */
+const TYPES = {
+  dog:      {unlock: 1, w: 4, hp: 4},   // Boston-Dynamics-style robot dog: fast, fires laser pairs
+  roomba:   {unlock: 2, w: 3, hp: 5},   // vacuum robot: rams you
+  tank:     {unlock: 3, w: 3, hp: 7},   // bomb-disposal tracked bot: slow, 3-way spread
+  humanoid: {unlock: 5, w: 3, hp: 8},   // walking humanoid: fast 3-shot bursts
+  arm:      {unlock: 6, w: 2, hp: 9},   // factory robot arm: slow, fires rings of shots
+  car:      {unlock: 8, w: 2, hp: 10}   // self-driving car: lines up, then charges
+};
 function spawnEnemy() {
   const p = findSpot(280, false); if (!p) return;
-  const dog = (game.tk || 0) >= 15 && Math.random() < .3;   // robot dogs join after 15 kills
-  game.enemies.push({dog, hp: dog ? 4 : 3, x: p.x, y: p.y, cool: 1.6 + Math.random(), t: Math.random() * 6, born: 0, shake: 0, orb: Math.random() < .5 ? 1 : -1});
+  const tk = game.tk || 0, bk = game.bossKills || 0, extra = Math.floor(tk / 80) + ((((wallet.gunLv || {})[gunKey()] || 0) >= 3) ? 1 : 0);   // tougher as you go, and when your gun is maxed
+  const pool = [["drone", 6]].concat(Object.keys(TYPES).filter(k => bk >= TYPES[k].unlock).map(k => [k, TYPES[k].w]));
+  let r = Math.random() * pool.reduce((a, q) => a + q[1], 0), ty = "drone"; for (const q of pool) { r -= q[1]; if (r <= 0) { ty = q[0]; break; } }
+  const base = ty === "drone" ? 3 : TYPES[ty].hp, e = {dog: ty === "dog", hp: base + extra, x: p.x, y: p.y, cool: 1.6 + Math.random(), t: Math.random() * 6, born: 0, shake: 0, orb: Math.random() < .5 ? 1 : -1};
+  if (ty !== "drone" && ty !== "dog") { e.ty = ty; e.ph2 = "aim"; e.pt = 0; }
+  game.enemies.push(e);
 }
 /* Big drone boss (2026-11-19): shows up after 10 drone kills, then 20 more, then 30 more...; 6 hits; wears a wiggling dildo hat and fires them at you. */
 function spawnBoss() {
-  const p = findSpot(300, false) || {x: game.x + 320, y: game.y - 120};
-  game.bossN = (game.bossN || 0) + 1; const kind = ["booty", "hat", "sling", "jet", "plug", "junk"][game.bossN % 6];   // the boss types take turns
-  const bhp = kind === "junk" ? 96 : 36;   // Junkbot has double health (2026-11-24)
-  game.enemies.push({x: p.x, y: p.y, hp: bhp, maxHp: bhp, big: true, kind, cool: 1.6, t: 0, born: 0, shake: 0, orb: 1});
-  game.floats.push({x: game.x, y: game.y - 50, t: 0, txt: {sling: "SLINGSHOT DRONE INCOMING!", jet: "POOP JET INCOMING!", plug: "PLUG BOSS INCOMING!", booty: "BOOTY BLIMP INCOMING!", hat: "BIG DRONE INCOMING!", junk: "JUNKBOT INCOMING! DON'T STEP IN THE OIL!"}[kind]});
-  const B = game.enemies[game.enemies.length - 1]; if (kind === "jet" || kind === "plug") { B.ph = "dash"; B.shield = true; B.pt = 0; }
+  const G = game, N = G.bossN || 0; G.bossN = N + 1;
+  const order = ["hat", "sling", "jet", "plug", "junk", "booty"], kind = order[N % 6];
+  const cycle = Math.floor(N / 6), copies = Math.min(5, 1 + cycle);                       // lap 2 = two of the same boss at once, lap 3 = three, ...
+  const gl = (wallet.gunLv || {})[gunKey()] || 0;                                         // a maxed-out gun makes bosses tougher (2026-11-24)
+  const base = kind === "junk" ? 96 : 36;
+  const bhp = Math.round(base * (1 + .2 * cycle + .12 * gl));
+  const lab = {sling: "SLINGSHOT DRONE", jet: "POOP JET", plug: "PLUG BOSS", booty: "BOOTY BLIMP", hat: "BIG DRONE", junk: "JUNKBOT"}[kind];
+  for (let c = 0; c < copies; c++) {
+    const p = findSpot(300, false) || {x: G.x + 320 * (c % 2 ? -1 : 1), y: G.y - 120 + c * 60};
+    const B = {x: p.x, y: p.y, hp: bhp, maxHp: bhp, big: true, kind, cool: 1.6 + c * .5, t: c, born: 0, shake: 0, orb: c % 2 ? -1 : 1};
+    if (kind === "jet" || kind === "plug") { B.ph = "dash"; B.shield = true; B.pt = 0; }
+    G.enemies.push(B);
+  }
+  SFX.play("warn"); G.floats.push({x: G.x, y: G.y - 50, t: 0, txt: (copies > 1 ? copies + " x " : "") + lab + (copies > 1 ? "S" : "") + " INCOMING!" + (kind === "junk" ? " DON'T STEP IN THE OIL!" : "")});
 }
 function drawD(g, x, y, ang, sc) {                                             // the hat/projectile shape, pointing "up" at ang
   g.save(); g.translate(x, y); g.rotate(ang); g.scale(sc, sc);
@@ -498,6 +548,7 @@ function drawBubble(g) {
 }
 /* ---------- score + high scores (2026-11-19): points for crates and enemies; top 10 saved with the coins ---------- */
 const PTS = {box: 10, gold: 50, drone: 25, dancer: 15, dog: 40, boss: 300};
+const helperSecs = () => 60 + 2 * (wallet.helperLv || 0), helperPrice = lv => Math.round(100 * Math.pow(1.18, lv) / 10) * 10;   // each level = +2 s for every helper
 function addScore(n, x, y) { game.score = (game.score || 0) + n; if (x !== undefined) game.floats.push({x, y: y - 26, t: 0, txt: "+" + n + " pts"}); const e = $("ghud-score"); if (e) e.textContent = "Score " + game.score.toLocaleString(); }
 function showScores(last) {
   const b = $("hs-body"); b.textContent = ""; const L = wallet.scores || [];
@@ -509,7 +560,7 @@ function showScores(last) {
 function updateSlotUps(dt) {
   const G = game;
   for (let i = G.slotUps.length - 1; i >= 0; i--) { const u = G.slotUps[i]; u.t += dt; if (u.t > 25) { G.slotUps.splice(i, 1); continue; }
-    if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 32) { G.slotUps.splice(i, 1); G.slots = Math.min(HELPERS.length, (G.slots || 1) + 1); burst(u.x, u.y, "#5df2a4", 20); G.floats.push({x: u.x, y: u.y - 30, t: 0, txt: "+1 helper slot! (" + G.slots + ")"}); paintHp(); } }
+    if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 32) { G.slotUps.splice(i, 1); G.slots = Math.min(HELPERS.length, (G.slots || 1) + 1); SFX.play("up"); burst(u.x, u.y, "#5df2a4", 20); G.floats.push({x: u.x, y: u.y - 30, t: 0, txt: "+1 helper slot! (" + G.slots + ")"}); paintHp(); } }
   if (wallet.carry > 0) { const h = bayTarget(); if (Math.hypot(G.x - h.x, G.y - h.y) < 70) {   // walk back to your bay to bank what you carry (safe if you get knocked out)
     const n = wallet.carry; wallet.coins += n; wallet.carry = 0; saveWallet(true); paintCoins(); burst(G.x, G.y - 20, "#ffc857", 14); G.floats.push({x: G.x, y: G.y - 50, t: 0, txt: "Banked " + n + " coins!"}); } }
 }
@@ -523,14 +574,15 @@ function hitEnemy(e) {
   if (!game.enemies.includes(e)) return;
   if (e.shield) { e.shake = .1; burst(e.x, e.y, "#7fe7ff", 3); return; }   // shielded bosses can't be hurt
   e.hp--; e.shake = .15; burst(e.x, e.y, "#b69cff", 4);
-  if (e.hp > 0) return;
+  if (e.hp > 0) { SFX.play("hit"); return; }
+  SFX.play(e.big ? "boom" : "kill");
   game.enemies.splice(game.enemies.indexOf(e), 1); burst(e.x, e.y, "#ff4d6d", 12); burst(e.x, e.y, "#7a3cff", 10);
   if (e.big) {                                                                 // boss down: big payout, next one needs 10 more kills
     burst(e.x, e.y, "#ff7ab8", 30); game.floats.push({x: e.x, y: e.y - 30, t: 0, txt: e.kind === "junk" ? "Junkbot down! +10" : "Big drone down! +10"}); if (e.kind === "junk") igniteOil(e);
     for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, sp = e.kind === "junk" ? 380 + Math.random() * 420 : 80 + Math.random() * 120;   /* Junkbot's coins blast outward */ game.coins.push({x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: Math.random() * 6}); }
-    game.kills = 0; game.bossNeed = Math.min(40, 10 + 5 * Math.floor((game.tk || 0) / 10));   /* next boss: 10 kills at level 1, +5 per level, max 40 (2026-11-19) */ game.bossKills = (game.bossKills || 0) + 1; if (game.bossKills % 2 === 1 && (game.slots || 1) < HELPERS.length) game.slotUps.push({x: e.x, y: e.y, t: 0}); addScore(PTS.boss, e.x, e.y - 40); paintHp(); return;                                       // next boss after another 10 kills (2026-11-19)
+    if (!game.enemies.some(x => x.big)) { game.kills = 0; game.bossNeed = Math.min(40, 10 + 5 * Math.floor((game.tk || 0) / 10)); }   /* next boss: 10 kills at level 1, +5 per level, max 40 (2026-11-19) */ if (!game.enemies.some(x => x.big)) game.bossKills = (game.bossKills || 0) + 1; if (!game.enemies.some(x => x.big) && game.bossKills % 2 === 1 && (game.slots || 1) < HELPERS.length) game.slotUps.push({x: e.x, y: e.y, t: 0}); addScore(PTS.boss, e.x, e.y - 40); paintHp(); return;                                       // next boss after another 10 kills (2026-11-19)
   }
-  addScore(e.dancer ? PTS.dancer : e.dog ? PTS.dog : PTS.drone, e.x, e.y);
+  addScore(e.dancer ? PTS.dancer : e.ty ? 40 + 10 * (TYPES[e.ty].unlock) : e.dog ? PTS.dog : PTS.drone, e.x, e.y);
   game.kills++; game.tk = (game.tk || 0) + 1; if (game.tk % 10 === 0) game.floats.push({x: game.x, y: game.y - 70, t: 0, txt: "More drones! Level " + (1 + game.tk / 10)}); if (game.kills >= game.bossNeed && !game.enemies.some(x => x.big)) spawnBoss(); paintHp();
   for (let i = 0; i < 3; i++) { const a = Math.random() * Math.PI * 2, sp = 70 + Math.random() * 90; game.coins.push({x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: Math.random() * 6}); }
   dropHelper(e.x, e.y);
@@ -540,6 +592,7 @@ function hitEnemy(e) {
 /* ---------- helpers: at most 2 at once (2026-11-19: keep the browser game light) ---------- */
 const HELPERS = ["cheeks", "curby", "plumbo", "sprintz", "burpo", "pimpachu", "kong", "stinion", "shellby"];   // no limit on how many at once (2026-11-19), one of each kind
 function helperOut(k) { const G = game; return k === "cheeks" ? !!G.cheeks || G.cheekUps.length > 0 : k === "curby" ? !!G.curby || G.curbyUps.length > 0 : G.allies.some(a => a.type === k) || G.allyUps.some(u => u.type === k); }
+function ringSpot(idx) { const G = game, n = Math.max(1, helpersActive()), a = -Math.PI / 2 + idx / n * Math.PI * 2; return {x: G.x + Math.cos(a) * 85, y: G.y + 14 + Math.sin(a) * 60}; }   // helpers wait in a circle around you
 function helpersActive() { const G = game; return (G.cheeks ? 1 : 0) + (G.curby ? 1 : 0) + G.allies.length; }
 function helperRoom() { const G = game; return 2 - helpersActive() - G.cheekUps.length - G.curbyUps.length - G.allyUps.length; }
 function dropHelper(x, y) {
@@ -554,23 +607,41 @@ function updateCheeks(dt) {
     const u = G.cheekUps[i]; u.t += dt;
     if (u.t > 14) { G.cheekUps.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30 && slotFree(u)) {
-      G.cheekUps.splice(i, 1); G.cheeks = {x: G.x - 60, y: G.y + 10, t: 60, cool: .5, face: 1, f: 0, ft: 0, moving: false};
-      burst(u.x, u.y, "#8fd14f", 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: "Master Cheeks!"});
+      G.cheekUps.splice(i, 1); G.cheeks = {x: G.x - 60, y: G.y + 10, t: 60, cool: .5, face: 1, f: 0, ft: 0, moving: false}; G.cheeks.t = helperSecs();
+      SFX.play("up"); burst(u.x, u.y, "#8fd14f", 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: "Master Cheeks!"});
     }
   }
   const C = G.cheeks; if (!C) return;
-  C.t -= dt; if (C.t <= 0) { burst(C.x, C.y, "#8fd14f", 14); G.floats.push({x: C.x, y: C.y, t: 0, txt: "Cheeks out!"}); G.cheeks = null; return; }
+  if (C.bye > 0) { C.bye -= dt; C.moving = false; if (C.bye <= 0) { burst(C.x, C.y, "#8fd14f", 14); G.cheeks = null; } return; }   // says "Cheeks out!" in a speech bubble, then vanishes
+  C.t -= dt; if (C.t <= 0) { C.t = 0; C.bye = 1.7; C.twerk = 0; C.moving = false; return; }
   C.ft += dt; if (C.ft > .12) { C.ft = 0; C.f++; }
-  const tx = G.x - G.face * 70, ty = G.y + 14, dx = tx - C.x, dy = ty - C.y, d = Math.hypot(dx, dy);
-  C.moving = d > 8; if (C.moving) { const sp = Math.min(d, (d > 200 ? 520 : 300) * dt); C.x += dx / d * sp; C.y += dy / d * sp; }
+  const rs = ringSpot(0), tx = rs.x, ty = rs.y, dx = tx - C.x, dy = ty - C.y, d = Math.hypot(dx, dy);
+  const charging = C.lz && C.lz.ph === "charge";
+  C.moving = d > 8 && !charging; if (C.moving) { const sp = Math.min(d, (d > 200 ? 520 : 300) * dt); C.x += dx / d * sp; C.y += dy / d * sp; }
   const ir = innerRect(), sr = scroller.getBoundingClientRect();
   const targets = G.enemies.concat(G.boxes).filter(o => onScreen(o, sr, ir) && Math.hypot(o.x - C.x, o.y - C.y) < 520);
   const tg = targets.sort((a, b) => (G.enemies.includes(b) - G.enemies.includes(a)) || (Math.hypot(a.x - C.x, a.y - C.y) - Math.hypot(b.x - C.x, b.y - C.y)))[0];
   C.face = tg ? (tg.x < C.x ? -1 : 1) : (dx < 0 ? -1 : 1);
-  if (tg || C.moving) { C.idle = 0; C.twerk = 0; } else { C.idle = (C.idle || 0) + dt; if (!C.twerk && C.idle > 2 + Math.random() * 3) { C.twerk = 1.5; C.idle = -1.5; G.floats.push({x: C.x, y: C.y - 50, t: 0, txt: "twerk!"}); } }   // nothing to shoot: a 1.5 s twerk now and then
-  if (C.twerk > 0) { C.twerk = Math.max(0, C.twerk - dt); C.face = -1; }
+  if (!C.lz && C.t <= 3.7) { C.lz = {ph: "charge", t: 0}; C.twerk = 0; SFX.play("charge"); G.floats.push({x: C.x, y: C.y - 50, t: 0, txt: "SPARTAN LASER CHARGING..."}); }   // his farewell: a Spartan laser
+  if (C.lz) {
+    const L = C.lz; L.t += dt;
+    if (L.ph === "charge") {
+      const foes = G.enemies.filter(o => onScreen(o, sr, ir)).sort((a, b) => (b.big ? 1 : 0) - (a.big ? 1 : 0) || Math.hypot(a.x - C.x, a.y - C.y) - Math.hypot(b.x - C.x, b.y - C.y)), tg2 = foes[0];
+      if (tg2) L.a = Math.atan2(tg2.y - (C.y + 4), tg2.x - C.x); else if (L.a === undefined) L.a = C.face < 0 ? Math.PI : 0;
+      C.face = Math.cos(L.a) < 0 ? -1 : 1;
+      if (L.t >= 2) {                                                          // FIRE: one hit kills everything on the line, goes right through
+        const ox = C.x, oy = C.y + 4, ca = Math.cos(L.a), sa = Math.sin(L.a);
+        const along = o => { const rx = o.x - ox, ry = o.y - oy; return rx * ca + ry * sa > 0 && Math.abs(-rx * sa + ry * ca) < (o.big ? 50 : 32); };
+        G.enemies.filter(along).forEach(e => { for (let k = 0; k < (e.maxHp || 60) + 5 && G.enemies.includes(e); k++) hitEnemy(e); });
+        G.boxes.filter(along).forEach(b => { for (let k = 0; k < 10 && G.boxes.includes(b); k++) hitBox(b); });
+        L.ph = "fire"; L.t = 0; L.ox = ox; L.oy = oy; SFX.play("spartan"); G.flash = .12;
+      }
+    } else if (L.t > .7) L.ph = "done";
+  }
+  if (C.twerk > 0) { C.twerk = Math.max(0, C.twerk - dt); C.face = -1; }                                   // bent over, bum in the air (can't shoot meanwhile)
+  else if (!C.lz) { C.idle = (C.idle || 0) + dt; if (C.idle > 2.5 + Math.random() * 2.5) { C.twerk = 2.2; C.idle = 0; G.floats.push({x: C.x, y: C.y - 50, t: 0, txt: ["twerk!", "shake it!", "clap those cheeks!", "booty break!"][Math.floor(Math.random() * 4)]}); SFX.play("twerk"); } }   // twerks every few seconds, even mid-fight (2026-11-25)
   C.cool -= dt;
-  if (tg && C.cool <= 0) { C.cool = .45; const a = Math.atan2(tg.y - (C.y + 4), tg.x - C.x); G.shots.push({x: C.x + Math.cos(a) * 22, y: C.y + 4 + Math.sin(a) * 22, vx: Math.cos(a) * 700, vy: Math.sin(a) * 700, t: 0, col: "#8fd14f"}); C.flash = .06; }
+  if (tg && C.cool <= 0 && !(C.twerk > 0) && !charging) { C.cool = .38; const a = Math.atan2(tg.y - (C.y + 4), tg.x - C.x); G.shots.push({x: C.x + Math.cos(a) * 22, y: C.y + 4 + Math.sin(a) * 22, vx: Math.cos(a) * 760, vy: Math.sin(a) * 760, t: 0, col: "#8fd14f", pow: 3}); C.flash = .06; SFX.play("shoot"); }
   C.flash = Math.max(0, (C.flash || 0) - dt);
 }
 /* ---------- Curby (2026-11-19): an original round puffball helper. A drone sometimes drops him; for 60 s he runs to the nearest drone,
@@ -590,7 +661,7 @@ function updateCurby(dt) {
     const u = G.curbyUps[i]; u.t += dt;
     if (u.t > 14) { G.curbyUps.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30 && slotFree(u)) {
-      G.curbyUps.splice(i, 1); G.curby = {x: G.x + 60, y: G.y + 14, t: 60, mode: "hunt", ammo: 0, cool: 0, face: 1, f: 0, ft: 0, moving: false, prey: null, mt: 0};
+      G.curbyUps.splice(i, 1); G.curby = {x: G.x + 60, y: G.y + 14, t: 60, mode: "hunt", ammo: 0, cool: 0, face: 1, f: 0, ft: 0, moving: false, prey: null, mt: 0}; G.curby.t = helperSecs();
       burst(u.x, u.y, "#ffa96b", 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: "Curby!"});
     }
   }
@@ -602,7 +673,7 @@ function updateCurby(dt) {
   const goTo = (tx, ty, sp) => { const dx = tx - C.x, dy = ty - C.y, d = Math.hypot(dx, dy); C.moving = d > 6; if (C.moving) { const st = Math.min(d, sp * dt); C.x += dx / d * st; C.y += dy / d * st; C.face = dx < 0 ? -1 : 1; } return d; };
   if (C.mode === "hunt") {                                                     // run to the nearest small drone
     const prey = near(G.enemies.filter(e => !e.big && !e.sucked));
-    if (!prey) { goTo(G.x + G.face * 60, G.y + 14, 320); return; }
+    if (!prey) { { const rs = ringSpot(game.cheeks ? 1 : 0); goTo(rs.x, rs.y, 320); } return; }
     const d = goTo(prey.x - (prey.x < C.x ? -46 : 46), prey.y + 6, 360); C.face = prey.x < C.x ? -1 : 1;
     if (d < 14) { C.mode = "inhale"; C.mt = 0; C.prey = prey; prey.sucked = true; }
   } else if (C.mode === "inhale") {                                            // mouth wide open, pull the drone in
@@ -614,7 +685,7 @@ function updateCurby(dt) {
     C.cool -= dt; C.squeeze = Math.max(0, (C.squeeze || 0) - dt);
     if (C.ammo <= 0) { if (C.cool <= .4) C.mode = "hunt"; return; }          // out of turds: go inhale another one
     const tg = near(G.enemies.filter(e => !e.sucked) .concat(G.enemies.length ? [] : G.boxes));
-    if (!tg) { goTo(G.x - G.face * 60, G.y + 14, 260); return; }
+    if (!tg) { { const rs = ringSpot(game.cheeks ? 1 : 0); goTo(rs.x, rs.y, 260); } return; }
     const d = Math.hypot(tg.x - C.x, tg.y - C.y); if (d > 420) goTo(tg.x, tg.y, 260); else C.moving = false;
     C.face = tg.x < C.x ? 1 : -1;                                              // turns his back to the target
     if (d <= 420 && C.cool <= 0 && C.ammo > 0) { C.cool = .75; C.ammo--; const a = Math.atan2(tg.y - C.y, tg.x - C.x), bx = C.x - C.face * 14, by = C.y + 6;
@@ -673,18 +744,18 @@ function updateAllies(dt) {
     const u = G.allyUps[i]; u.t += dt;
     if (u.t > 14) { G.allyUps.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30 && slotFree(u)) {
-      G.allyUps.splice(i, 1); G.allies.push({type: u.type, x: G.x - 60, y: G.y + 14, t: 60, cool: .8, face: 1, f: 0, ft: 0, moving: false, mode: "follow", n: 0});
+      G.allyUps.splice(i, 1); G.allies.push({type: u.type, x: G.x - 60, y: G.y + 14, t: 60, cool: .8, face: 1, f: 0, ft: 0, moving: false, mode: "follow", n: 0}); G.allies[G.allies.length - 1].t = helperSecs();
       burst(u.x, u.y, ALLY[u.type][1], 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: ALLY[u.type][0] + "!"});
     }
   }
   for (let i = G.allies.length - 1; i >= 0; i--) {
     const A = G.allies[i]; A.t -= dt; A.ft += dt; if (A.ft > .11) { A.ft = 0; A.f++; }
     if (A.t <= 0) { burst(A.x, A.y, ALLY[A.type][1], 14); G.floats.push({x: A.x, y: A.y, t: 0, txt: "Bye " + ALLY[A.type][0] + "!"}); G.allies.splice(i, 1); continue; }
-    const slot = G.allies.length > 1 && i === 1 ? 1 : -1, hx = G.x + slot * G.face * 80, hy = G.y + 20 + (i ? 16 : 0);
+    const rs = ringSpot((G.cheeks ? 1 : 0) + (G.curby ? 1 : 0) + i), hx = rs.x, hy = rs.y;
     const goTo = (tx, ty, sp) => { const dx = tx - A.x, dy = ty - A.y, d = Math.hypot(dx, dy); A.moving = d > 6; if (A.moving) { const st = Math.min(d, sp * dt); A.x += dx / d * st; A.y += dy / d * st; A.face = dx < 0 ? -1 : 1; } return d; };
     A.cool -= dt;
     if (A.type === "plumbo") {
-      goTo(hx + Math.sin(A.t * 2.3) * 26, hy + Math.cos(A.t * 1.7) * 10, 230);               // staggers
+      goTo(hx + Math.sin(A.t * 2.3) * 8, hy + Math.cos(A.t * 1.7) * 4, 230);               // staggers
       if (Math.random() < dt * .4) G.floats.push({x: A.x, y: A.y - 34, t: 0, txt: "hic!"});
       const tg = targetsNear(A.x, A.y, 470, true)[0];
       if (tg) A.face = tg.x < A.x ? -1 : 1;
@@ -725,7 +796,7 @@ function updateAllies(dt) {
         if (!G.enemies.includes(A.tg)) next();
         else { const T = A.tg, d = goTo(T.x, T.y + 10, 820); if (G.f % 2) G.parts.push({x: A.x, y: A.y + 6, vx: (Math.random() - .5) * 80, vy: -40, t: 0, life: .35, col: "#e0a050", sz: 3});
           if (d < 24) { dmg(T, T.big ? 2 : 4); A.hits.push(T); burst(A.x, A.y, "#c47a2c", 10); G.floats.push({x: A.x, y: A.y - 30, t: 0, txt: ["BONK!", "SHELL SHOCK!", "WHAP!", "COWABONK!"][A.hits.length - 1]}); next(); } } }
-      else if (goTo(hx, hy, 380) < 30) { A.mode = "follow"; A.cool = 1.2; A.dizzy = 1.6; G.floats.push({x: A.x, y: A.y - 34, t: 0, txt: "@_@ dizzy..."}); }
+      else if (goTo(hx, hy, 380) < 30) { A.mode = "follow"; A.cool = 5; A.dizzy = 2.6; G.floats.push({x: A.x, y: A.y - 34, t: 0, txt: "@_@ dizzy..."}); }
     } else if (A.type === "burpo") {
       const box = G.boxes.slice().sort((a, b) => Math.hypot(a.x - A.x, a.y - A.y) - Math.hypot(b.x - A.x, b.y - A.y))[0];
       const foe = targetsNear(A.x, A.y, 600, false)[0];
@@ -775,7 +846,7 @@ function drawAllies(g) {
     drawAllyBody(g, {type: u.type, x: 0, y: 6, face: 1, f: G.f, moving: false, t: 60}, .62); g.font = font(12); g.textAlign = "center"; g.fillStyle = col; g.fillText(nm, 0, 38); g.restore();
   });
   G.allies.forEach(A => { drawAllyBody(g, A, 1); const [nm, col] = ALLY[A.type], top = A.y - 46;
-    g.fillStyle = "rgba(7,11,20,.7)"; g.fillRect(A.x - 22, top, 44, 4); g.fillStyle = col; g.fillRect(A.x - 22, top, 44 * Math.max(0, A.t) / 60, 4);
+    g.fillStyle = "rgba(7,11,20,.7)"; g.fillRect(A.x - 22, top, 44, 4); g.fillStyle = col; g.fillRect(A.x - 22, top, 44 * Math.min(1, Math.max(0, A.t) / helperSecs()), 4);
     g.font = font(11); g.textAlign = "center"; g.fillText(nm + " " + Math.ceil(Math.max(0, A.t)) + "s", A.x, top - 4); });
 }
 function drawAllyBody(g, A, sc) {
@@ -875,29 +946,67 @@ function drawCheeks(g) {
     g.restore();
   });
   const C = G.cheeks; if (!C) return;
-  const tw = C.twerk > 0, tws = tw ? Math.sin(C.twerk * 42) : 0;
-  const s = 3, fl = C.face < 0, x0 = C.x - 7 * s, y0 = C.y - 12 * s + (C.moving ? (C.f % 2) * 2 : 0) + (tw ? 3 + Math.abs(tws) * 2 : 0);
-  const P = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x0 + (fl ? (14 - x - w) : x) * s, y0 + y * s, w * s, h * s); };
+  const tw = C.twerk > 0, tws = tw ? Math.sin(C.twerk * 30) : 0;
+  const s = 3, fl = C.face < 0, x0 = C.x - 7 * s, y0 = C.y - 12 * s + (C.moving ? (C.f % 2) * 2 : 0) + (tw ? 2 : 0);
+  const P0 = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x0 + (fl ? (14 - x - w) : x) * s, y0 + y * s, w * s, h * s); };
+  let ox = 0, oy = 0; const P = (x, y, w, h, c) => P0(x + ox, y + oy, w, h, c);
   g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(C.x, C.y + 14, 16, 4, 0, 0, Math.PI * 2); g.fill();
   const A = "#5b7a3a", L = "#7da34c", D = "#3a5226", V = "#33d6ff", K = "#ffb3a7", KD = "#e8857a";
+  if (tw) { ox = 3; oy = 6; }                                                                                  // bent over: head down at the front
   P(4, 0, 6, 1, L); P(3, 1, 8, 5, A); P(3, 1, 8, 1, L); P(6, 2, 5, 3, V); P(7, 2, 2, 1, "#c9f4ff");          // helmet + visor (faces right)
+  if (tw) { ox = 2; oy = 3; }
   P(3, 6, 8, 6, A); P(4, 6, 6, 1, L); P(5, 8, 4, 1, D);                                                      // chest armor
-  const bo = tw ? Math.round(tws) : 0, bu = tw ? Math.round(Math.cos(C.twerk * 42)) : 0;   // the bum shakes while twerking
+  if (tw) { ox = 0; oy = 0; }
+  const bo = tw ? Math.round(tws * 1.5) : 0, bu = tw ? Math.round(Math.cos(C.twerk * 30) * 1.5) - 4 : 0;   // the bum shakes while twerking
   P(1 - bo, 10 + bu, 3, 1, K); P(0 - bo, 11 + bu, 4, 3, K); P(1 - bo, 14 + bu, 3, 1, K); P(1 - bo, 11 + bu, 1, 1, "#ffd6cf"); P(0 - bo, 12 + bu, 3, 1, KD); P(0 - bo, 14 + bu, 1, 1, KD);                      // the bum, poking out the back
   P(4, 12, 7, 2, D);                                                                                          // belt
   const step = C.moving && C.f % 2; P(4, 14, 3, 3 - step, A); P(8, 14, 3, 3 - (C.moving && !(C.f % 2)), A); P(3, 16, 4, 1, D); P(8, 16, 4, 1, D);   // legs + boots
-  P(10, 7, 2, 4, A);                                                                                           // arm
-  P(10, 9, 5, 2, "#2b3446"); P(14, 9, 1, 1, C.flash > 0 ? "#fff2b0" : "#8fd14f");                             // rifle
+  if (tw) { P(8, 12, 2, 4, A); P(8, 15, 2, 1, KD); }                                                          // hands on the knees
+  else { P(10, 7, 2, 4, A); P(10, 9, 5, 2, "#2b3446"); P(14, 9, 1, 1, C.flash > 0 ? "#fff2b0" : "#8fd14f"); }   // arm + rifle                             // rifle
+  if (C.lz && C.lz.ph === "charge") {                                                                          // charge-up: red sight line + glowing orb at the muzzle
+    const L = C.lz, k = Math.min(1, L.t / 2), ca = Math.cos(L.a), sa = Math.sin(L.a), tx = C.x + ca * 36, ty = C.y + 4 + sa * 36;
+    g.strokeStyle = "rgba(255,50,50," + (.15 + .5 * k) + ")"; g.lineWidth = 1 + 3 * k; g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx + ca * 2200, ty + sa * 2200); g.stroke();
+    g.shadowColor = "#ff3b3b"; g.shadowBlur = 24; g.fillStyle = "#ffd0d0"; g.beginPath(); g.arc(tx, ty, 4 + 16 * k + Math.sin(L.t * 40) * 2, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
+  } else if (C.lz && C.lz.ph === "fire") {
+    const L = C.lz, k = 1 - L.t / .7, ca = Math.cos(L.a), sa = Math.sin(L.a), tx = L.ox + ca * 36, ty = L.oy + sa * 36;
+    g.save(); g.lineCap = "round"; g.shadowColor = "#ff3b3b"; g.shadowBlur = 30; g.strokeStyle = "rgba(255,60,40," + k + ")"; g.lineWidth = 46 * k + 4; g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx + ca * 2400, ty + sa * 2400); g.stroke();
+    g.shadowBlur = 0; g.strokeStyle = "rgba(255,255,255," + Math.min(1, k * 1.4) + ")"; g.lineWidth = 16 * k + 2; g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx + ca * 2400, ty + sa * 2400); g.stroke(); g.restore();
+  }
+  if (C.bye > 0) { const tw2 = 100, bx = C.x - tw2 / 2, by = y0 - 46; g.fillStyle = "#ffffff"; g.strokeStyle = "#1a1d24"; g.lineWidth = 2; g.beginPath(); g.roundRect(bx, by, tw2, 26, 8); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(C.x - 6, by + 25); g.lineTo(C.x + 2, by + 38); g.lineTo(C.x + 6, by + 25); g.closePath(); g.fillStyle = "#ffffff"; g.fill(); g.beginPath(); g.moveTo(C.x - 6, by + 26); g.lineTo(C.x + 2, by + 38); g.lineTo(C.x + 6, by + 26); g.stroke();
+    g.fillStyle = "#1a1d24"; g.font = "700 14px " + getComputedStyle(document.body).getPropertyValue("--display"); g.textAlign = "center"; g.fillText("Cheeks out!", C.x, by + 18); return; }
   const left = Math.ceil(C.t); g.font = "700 11px " + getComputedStyle(document.body).getPropertyValue("--display"); g.textAlign = "center";
-  g.fillStyle = "rgba(7,11,20,.7)"; g.fillRect(C.x - 22, y0 - 12, 44, 4); g.fillStyle = "#8fd14f"; g.fillRect(C.x - 22, y0 - 12, 44 * C.t / 60, 4);
+  g.fillStyle = "rgba(7,11,20,.7)"; g.fillRect(C.x - 22, y0 - 12, 44, 4); g.fillStyle = "#8fd14f"; g.fillRect(C.x - 22, y0 - 12, 44 * Math.min(1, C.t / helperSecs()), 4);
   g.fillText("Master Cheeks " + left + "s", C.x, y0 - 16);
 }
-function paintHp() { if (game.on) $("ghud-hp").textContent = "\u2665".repeat(Math.max(0, game.hp)) + "\u2661".repeat(Math.max(0, 5 - game.hp)); $("ghud-gun").textContent = (game.tempGun ? UPS[game.tempGun][0] + " (this round) · " : "") + "Helpers " + (typeof helpersActive === "function" && game.allies ? helpersActive() : 0) + "/" + (game.slots || 1) + " · " + (game.enemies && game.enemies.some(x => x.big) ? "BIG DRONE!" : "Big drone in " + Math.max(0, (game.bossNeed || 10) - (game.kills || 0)) + " kills"); }
+function paintHp() { if (game.on && game._ph !== undefined && game.hp < game._ph) SFX.play(game.hp <= 0 ? "ko" : "hurt"); game._ph = game.hp; if (game.on) $("ghud-hp").textContent = "\u2665".repeat(Math.max(0, game.hp)) + "\u2661".repeat(Math.max(0, 5 - game.hp)); $("ghud-gun").textContent = (game.tempGun ? UPS[game.tempGun][0] + " (this round) · " : "") + "Helpers " + (typeof helpersActive === "function" && game.allies ? helpersActive() : 0) + "/" + (game.slots || 1) + " · " + (game.enemies && game.enemies.some(x => x.big) ? "BIG DRONE!" : "Big drone in " + Math.max(0, (game.bossNeed || 10) - (game.kills || 0)) + " kills"); }
+function typeAI(e, dt, dx, dy, d, on) {
+  const G = game, ux = dx / d, uy = dy / d, shoot = (a, sp, o) => G.ebullets.push(Object.assign({x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: 0}, o || {}));
+  const keep = (lo, hi, spd) => { const w = !on ? 2.5 : d > hi ? 1 : d < lo ? -1 : 0; e.x += (ux * w * spd - uy * e.orb * 30) * dt; e.y += (uy * w * spd + ux * e.orb * 30) * dt; };
+  e.cool -= dt; e.fc = dx < 0 ? -1 : 1;
+  if (e.ty === "roomba") {                                                   // charges, bumps you, backs off, charges again
+    e.pt += dt; if (e.ph2 === "aim") { e.x += ux * 150 * dt; e.y += uy * 150 * dt; if (d < 34) { hurtPlayer(false); e.ph2 = "back"; e.pt = 0; } } else { e.x -= ux * 120 * dt; e.y -= uy * 120 * dt; if (e.pt > 1.1) e.ph2 = "aim"; }
+  } else if (e.ty === "tank") {                                              // slow, 3-way spread
+    keep(260, 380, 45); if (e.cool <= 0 && on && e.born >= 1) { e.cool = 2.6 + Math.random() * .6; const a = Math.atan2(dy, dx); [-.28, 0, .28].forEach(o => shoot(a + o, 200)); }
+  } else if (e.ty === "humanoid") {                                          // walks, fires bursts of 3
+    e.stc = (e.stc === undefined ? 1 + Math.random() * 2 : e.stc) - dt; e.stm = Math.max(0, (e.stm || 0) - dt);
+    if (e.stc <= 0) { e.stc = 2.2 + Math.random() * 2.2; e.stm = .8 + Math.random() * .7; if (on) G.floats.push({x: e.x, y: e.y - 44, t: 0, txt: ["whoa!", "oof!", "*trips*", "ow my ankle"][Math.floor(Math.random() * 4)]}); }
+    if (e.stm > 0) { e.cool = Math.max(e.cool, .4); e.x += Math.sin(e.t * 17) * 70 * dt - ux * 20 * dt * Math.sin(e.t * 9); e.y += Math.cos(e.t * 13) * 50 * dt; }   // stumbling around, can't shoot
+    else keep(230, 340, 95); if (e.cool <= 0 && on && e.born >= 1 && !(e.stm > 0)) { e.cool = 2.4 + Math.random() * .8; const a = Math.atan2(dy, dx); for (let k = 0; k < 3; k++) shoot(a, 270, {t: -k * .16}); }
+  } else if (e.ty === "arm") {                                               // creeps along, spits a ring of shots
+    keep(300, 420, 30); if (e.cool <= 0 && on && e.born >= 1) { e.cool = 3.2 + Math.random(); const a0 = Math.random() * 6.28; for (let k = 0; k < 8; k++) shoot(a0 + k * Math.PI / 4, 170); }
+  } else if (e.ty === "car") {                                               // lines up (headlights flash), then floors it
+    e.pt += dt;
+    if (e.ph2 === "aim") { keep(240, 400, 70); if (e.pt > 2.2 && on && e.born >= 1) { e.ph2 = "warn"; e.pt = 0; e.dx = ux; e.dy = uy; } }
+    else if (e.ph2 === "warn") { if (e.pt > .7) { e.ph2 = "go"; e.pt = 0; } }
+    else { e.x += e.dx * 620 * dt; e.y += e.dy * 620 * dt; if (Math.hypot(G.x - e.x, G.y - e.y) < 34) hurtPlayer(false); if (e.pt > .8) { e.ph2 = "aim"; e.pt = 0; } }
+  }
+}
 function updateFoes(dt) {
   const G = game, ir = innerRect(), sr = scroller.getBoundingClientRect();
   G.time += dt; G.inv = Math.max(G.bubble > 0 ? .05 : 0, G.inv - dt);   /* shield bubble: nothing can hurt you (inv stays on) */ G.hurt = Math.max(0, G.hurt - dt); G.needT = Math.max(0, G.needT - dt);
   G.espawn -= dt;
-  if (G.espawn <= 0) { G.espawn = Math.max(3.5, 8 - G.time / 30) + Math.random() * 3; const lv = Math.floor((G.tk || 0) / 10); G.espawn = Math.max(.7, G.espawn * Math.pow(.85, lv)); if (G.enemies.length < Math.min(4 + Math.round(1.5 * lv), 18, 2 + Math.floor(G.time / 25) + Math.round(1.5 * lv))) { spawnEnemy(); if (lv >= 4 && Math.random() < .25) spawnEnemy(); } }   // every 10 kills: 15% faster spawns, 1-2 more drones (2026-11-19: a touch gentler than 20%/+2)
+  if (G.espawn <= 0) { G.espawn = Math.max(3.5, 8 - G.time / 30) + Math.random() * 3; const lv = Math.floor((G.tk || 0) / 10); G.espawn = Math.max(.7, G.espawn * Math.pow(.85, lv)); if (G.enemies.length < Math.min(150, 4 + Math.round(1.5 * lv), 2 + Math.floor(G.time / 25) + Math.round(1.5 * lv))) { spawnEnemy(); if (lv >= 4 && Math.random() < .25) spawnEnemy(); } }   // every 10 kills: 15% faster spawns, 1-2 more drones (2026-11-19: a touch gentler than 20%/+2)
   G.enemies.forEach(e => {
     e.t += dt; e.born = Math.min(1, e.born + dt * 3); e.shake = Math.max(0, e.shake - dt);
     if (e.sucked || e.dancer) return;                                                      // being inhaled by Curby: no moving or shooting
@@ -905,6 +1014,7 @@ function updateFoes(dt) {
     if (e.kind === "booty") { bootyAI(e, dt, dx, dy, d); return; }
     if (e.kind === "junk") { junkAI(e, dt, dx, dy, d); return; }
     if (e.ph) { bomberAI(e, dt, dx, dy, d); return; }
+    if (e.ty) { typeAI(e, dt, dx, dy, d, on); return; }
     const want = on ? (d > (e.big ? 320 : 260) ? 1 : d < (e.big ? 240 : 190) ? -1 : 0) : 2.5;   // keep a dodging distance; hurry back if off screen
     const spd = e.big ? 60 : e.dog ? 140 : 85; e.x += (dx / d * want * spd + -dy / d * e.orb * 40) * dt; e.y += (dy / d * want * spd + dx / d * e.orb * 40) * dt;
     e.cool -= dt;
@@ -913,6 +1023,7 @@ function updateFoes(dt) {
     if (e.dog && e.cool <= 0 && on && e.born >= 1) { e.cool = 1.4 + Math.random() * .8; const a = Math.atan2(dy - 10, dx); for (let k = 0; k < 2; k++) G.ebullets.push({x: e.x + Math.cos(a) * 20, y: e.y - 14 + Math.sin(a) * 20, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, t: -k * .12, laser: true}); return; }
     if (!e.big && e.cool <= 0 && on && e.born >= 1) { e.cool = 1.7 + Math.random() * 1.2; const a = Math.atan2(dy, dx); G.ebullets.push({x: e.x, y: e.y + 6, vx: Math.cos(a) * 230, vy: Math.sin(a) * 230, t: 0}); }
   });
+  const wl = WORLD.wall + 30; G.enemies.forEach(e => { if (e.sucked) return; e.x = Math.max(wl, Math.min(WORLD.w - wl, e.x)); e.y = Math.max(wl, Math.min(WORLD.h - wl, e.y)); if (e.fx !== undefined) { e.fx = Math.max(wl, Math.min(WORLD.w - wl, e.fx)); e.fy = Math.max(wl, Math.min(WORLD.h - wl, e.fy)); } });   // nobody leaves the brick walls (2026-11-24)
   for (let i = G.ebullets.length - 1; i >= 0; i--) {
     const b = G.ebullets[i]; b.t += dt; if (b.t < 0) continue; b.x += b.vx * dt; b.y += b.vy * dt;
     if (b.c && Math.hypot(b.x - b.sx, b.y - b.sy) > 560) { G.ebullets.splice(i, 1); splat(b.x, b.y); continue; }   // snaps at the end of its stretch
@@ -933,7 +1044,7 @@ function updateFoes(dt) {
     if (u.t > 15) { G.ups.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30) {
       const [nm, price] = UPS[u.k];
-      if (wallet.carry >= price) { wallet.carry -= price; G.tempGun = u.k; G.ups.splice(i, 1); burst(u.x, u.y, "#4fe3ff", 16); G.floats.push({x: u.x, y: u.y, t: 0, txt: nm + "!"}); saveWallet(false); paintCoins(); paintHp(); }
+      if (wallet.carry >= price) { wallet.carry -= price; G.tempGun = u.k; SFX.play("up"); G.ups.splice(i, 1); burst(u.x, u.y, "#4fe3ff", 16); G.floats.push({x: u.x, y: u.y, t: 0, txt: nm + "!"}); saveWallet(false); paintCoins(); paintHp(); }
       else if (G.needT <= 0) { G.needT = 1.2; G.floats.push({x: u.x, y: u.y, t: 0, txt: "Need " + (price - wallet.carry) + " more"}); }
     }
   }
@@ -974,7 +1085,7 @@ function drawFoes(g) {
     g.restore();
     g.fillStyle = "rgba(7,11,20,.8)"; g.fillRect(e.x - 40, e.y - 58, 80, 7); g.fillStyle = "#ff4d6d"; g.fillRect(e.x - 40, e.y - 58, 80 * e.hp / (e.maxHp || 36), 7);
   });
-  G.enemies.filter(e => !e.dancer && e.kind !== "sling" && e.kind !== "jet" && e.kind !== "plug" && e.kind !== "booty" && e.kind !== "junk" && !e.dog).forEach(e => {      // purple pixel drone with a red eye (the boss is bigger, darker, with a hat)
+  G.enemies.filter(e => !e.dancer && e.kind !== "sling" && e.kind !== "jet" && e.kind !== "plug" && e.kind !== "booty" && e.kind !== "junk" && !e.dog && !e.ty).forEach(e => {      // purple pixel drone with a red eye (the boss is bigger, darker, with a hat)
     const s = (e.big ? 5.5 : 3) * (.4 + .6 * e.born), jx = e.shake > 0 ? (Math.random() - .5) * 4 : 0, x0 = e.x - 7 * s + jx, y0 = e.y - 6 * s + Math.sin(e.t * 5) * 3;
     const P = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x0 + x * s, y0 + y * s, w * s, h * s); };
     g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(e.x, e.y + 26, 14, 4, 0, 0, Math.PI * 2); g.fill();
@@ -995,6 +1106,29 @@ function drawFoes(g) {
     g.restore();
     for (let i = 0; i < e.hp; i++) { g.fillStyle = "#ff4d6d"; g.fillRect(e.x - 10 + i * 6, e.y - 30, 4, 3); }
   });
+  G.enemies.filter(e => e.ty && !e.dancer).forEach(e => {                  // the newer robots (2026-11-25)
+    const sc = .4 + .6 * e.born, fc = e.fc || 1, t = e.t, x = e.x + (e.shake > 0 ? (Math.random() - .5) * 4 : 0), y = e.y;
+    const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(a, b, w, h); };
+    g.save(); g.translate(x, y); g.scale(fc * sc, sc); g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(0, 26, 24, 5, 0, 0, Math.PI * 2); g.fill();
+    if (e.ty === "humanoid" && e.stm > 0) { g.translate(0, 24); g.rotate(Math.sin(t * 16) * .45); g.translate(0, -24); }
+    if (e.ty === "roomba") {
+      g.fillStyle = "#cfd6e6"; g.beginPath(); g.ellipse(0, 12, 26, 14, 0, 0, Math.PI * 2); g.fill(); g.fillStyle = "#8a9bbf"; g.beginPath(); g.ellipse(0, 8, 26, 12, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#2b2f38"; g.beginPath(); g.ellipse(0, 8, 9, 5, 0, 0, Math.PI * 2); g.fill(); g.fillStyle = e.ph2 === "aim" ? "#ff4d6d" : "#5df2a4"; g.fillRect(10, 4, 5, 3);
+      g.strokeStyle = "#ff9d5c"; g.lineWidth = 3; for (let k = 0; k < 3; k++) { const a = t * 20 + k * 2.1; g.beginPath(); g.moveTo(-24, 14); g.lineTo(-24 + Math.cos(a) * 9, 14 + Math.sin(a) * 4); g.stroke(); }
+    } else if (e.ty === "tank") {
+      R(-26, 8, 52, 16, "#2b2f38"); for (let k = 0; k < 6; k++) R(-24 + k * 9 + (t * 20 % 9), 10, 4, 12, "#4a505c"); R(-18, -6, 36, 16, "#6d7a4a"); R(-12, -16, 22, 12, "#85945a"); R(8, -13, 22, 5, "#2b2f38"); R(-6, -13, 4, 4, e.cool < .4 ? "#fff2b0" : "#ff4d6d");
+    } else if (e.ty === "humanoid") {
+      const st = Math.sin(t * 9) * 5; g.strokeStyle = "#3a3f4a"; g.lineWidth = 5; g.beginPath(); g.moveTo(-5, 10); g.lineTo(-5 + st, 26); g.moveTo(5, 10); g.lineTo(5 - st, 26); g.stroke();
+      R(-10, -12, 20, 24, "#e8ecf4"); R(-10, 4, 20, 4, "#8a9bbf"); R(-6, -26, 12, 13, "#cfd6e6"); R(-3, -22, 8, 4, e.cool < .5 ? "#fff2b0" : "#4fe3ff"); R(8, -8, 16, 5, "#2b2f38"); R(-20, -8, 10, 5, "#8a9bbf");
+    } else if (e.ty === "arm") {
+      R(-18, 14, 36, 10, "#ffb300"); R(-5, -6, 10, 22, "#f2c230"); const sw = Math.sin(t * 2) * .4; g.save(); g.translate(0, -6); g.rotate(sw); R(-4, -26, 8, 26, "#ffb300"); g.translate(0, -26); g.rotate(-sw * 1.6 + .5); R(-4, -22, 8, 22, "#f2c230"); R(-7, -28, 14, 7, "#2b2f38"); R(-3, -26, 6, 3, e.cool < .5 ? "#fff2b0" : "#ff4d6d"); g.restore();
+    } else if (e.ty === "car") {
+      const flash = e.ph2 === "warn" && Math.floor(t * 14) % 2; R(-28, -2, 56, 18, flash ? "#fff2b0" : "#3f7fe0"); R(-16, -14, 30, 14, "#6fa4f0"); R(-12, -12, 10, 9, "#bfe3ff"); R(2, -12, 10, 9, "#bfe3ff");
+      g.fillStyle = "#1a1d24"; [[-17, 16], [17, 16]].forEach(([wx, wy]) => { g.beginPath(); g.arc(wx, wy, 7, 0, 7); g.fill(); }); R(24, 3, 6, 5, e.ph2 === "aim" ? "#fff2b0" : "#ff4d6d"); R(-8, -20, 6, 6, "#4fe3ff");
+    }
+    g.restore();
+    for (let i = 0; i < e.hp && i < 14; i++) { g.fillStyle = "#ff4d6d"; g.fillRect(e.x - 3.5 * Math.min(e.hp, 14) + i * 7, e.y - 40, 5, 3); }
+  });
   G.ebullets.forEach(b => { if (b.t < 0) return; if (b.laser) { g.strokeStyle = "#5df2ff"; g.lineWidth = 3; g.shadowColor = "#5df2ff"; g.shadowBlur = 8; g.beginPath(); g.moveTo(b.x, b.y); g.lineTo(b.x - b.vx * .04, b.y - b.vy * .04); g.stroke(); g.shadowBlur = 0; return; }
     if (b.plug) { drawPlug(g, b.x, b.y, Math.atan2(b.vy, b.vx) + Math.PI / 2 + Math.sin(b.t * 12) * .3, .9); return; } if (b.c) { const st = 1 + .25 * Math.sin(b.t * 18); drawCondom(g, b.x, b.y, Math.atan2(b.vy, b.vx) + Math.PI / 2, st); return; } if (b.d) { drawD(g, b.x, b.y + 8, Math.atan2(b.vy, b.vx) + Math.PI / 2 + Math.sin(b.t * 14) * .25, 1); return; } g.fillStyle = "#ff4d6d"; g.shadowColor = "#ff4d6d"; g.shadowBlur = 12; g.beginPath(); g.arc(b.x, b.y, 6, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0; g.fillStyle = "#ffd0d6"; g.fillRect(b.x - 2, b.y - 2, 4, 4); });
 }
@@ -1002,7 +1136,7 @@ function burst(x, y, col, n) { for (let i = 0; i < n; i++) { const a = Math.rand
 function hitBox(b) {
   b.hp--; b.shake = .15; burst(b.x, b.y, b.gold ? "#ffc857" : "#c47a43", 3);
   if (b.hp > 0) return;
-  game.boxes.splice(game.boxes.indexOf(b), 1); burst(b.x, b.y, b.gold ? "#ffc857" : "#8a4b2b", 14); if (game.on) addScore(b.gold ? PTS.gold : PTS.box);
+  SFX.play("crate"); game.boxes.splice(game.boxes.indexOf(b), 1); burst(b.x, b.y, b.gold ? "#ffc857" : "#8a4b2b", 14); if (game.on) addScore(b.gold ? PTS.gold : PTS.box);
   const n = b.gold ? 5 : 1 + Math.floor(Math.random() * 3);
   for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = 70 + Math.random() * 90; game.coins.push({x: b.x, y: b.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, t: Math.random() * 6}); }
 }
@@ -1011,7 +1145,7 @@ function fire() {
   const gun = GUNS[gunKey()] || GUNS.blaster, ox = game.x, oy = game.y + 6;
   const a0 = Math.atan2(game.my - oy, game.mx - ox), mx = ox + Math.cos(a0) * gun.len, my = oy + Math.sin(a0) * gun.len;
   const lv = (wallet.gunLv || {})[gunKey()] || 0; game.gunLv = lv;
-  game.cool = gun.cool * (1 - .15 * lv); game.flash = .06;
+  game.cool = gun.cool * (1 - .15 * lv); game.flash = .06; SFX.play(gun.flame ? "flame" : gun.zap ? "zap" : gun.beam ? "laser" : gun.grenade ? "thump" : "shoot");
   if (gun.flame) {                                                            // flamethrower: short cone, burns whatever is in it
     for (let i = 0; i < 4; i++) { const a = a0 + (Math.random() - .5) * .34, sp = (1350 + Math.random() * 300) * (380 * (1 + .25 * (game.gunLv || 0))) / 650; game.flames.push({x: mx, y: my, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: 0, life: .5 + Math.random() * .12}); }   // long reach (2026-11-19)
     const inCone = o => { const d = Math.hypot(o.x - mx, o.y - my), da = Math.atan2(Math.sin(Math.atan2(o.y - my, o.x - mx) - a0), Math.cos(Math.atan2(o.y - my, o.x - mx) - a0)); return d < 380 * (1 + .25 * (game.gunLv || 0)) && Math.abs(da) < .22 + 30 / Math.max(30, d); };
@@ -1064,7 +1198,7 @@ function updatePet(dt) {
     if (mv(G.x - G.face * 30, G.y + 14, (PET_SPEED[lookOf("commander").pet] || 150) * 1.1) < 26) { P.mode = "follow"; wallet.carry++; G.round++; G.floats.push({x: G.px, y: G.py - 20, t: 0, txt: "+1"}); saveWallet(false); paintCoins(); }
   }
 }
-function grab(c) { wallet.carry++; game.round++; game.floats.push({x: c.x, y: c.y, t: 0, txt: "+1"}); saveWallet(false); paintCoins(); }
+function grab(c) { SFX.play("coin"); wallet.carry++; game.round++; game.floats.push({x: c.x, y: c.y, t: 0, txt: "+1"}); saveWallet(false); paintCoins(); }
 function walkTo(tg, dt) {
   const G = game, dx = tg.x - G.x, dy = tg.y - G.y, d = Math.hypot(dx, dy);
   if (d <= 4) { G.x = tg.x; G.y = tg.y; G.moving = false; return true; }
@@ -1073,10 +1207,10 @@ function walkTo(tg, dt) {
 /* the page scrolls to keep the robot away from the edges, so he can roam the whole pipeline */
 function follow() {
   const sr = scroller.getBoundingClientRect(), ir = innerRect(), sx = ir.left + game.x, sy = ir.top + game.y;
-  const mx = Math.min(170, sr.width / 3), my = Math.min(150, sr.height / 3); let dx = 0, dy = 0;
+  const mx = sr.width * .36, my = sr.height * .34; let dx = 0, dy = 0;   // the bot stays in the middle ~30% of the screen; the camera eases after him
   if (sx > sr.right - mx) dx = sx - (sr.right - mx); else if (sx < sr.left + mx) dx = sx - (sr.left + mx);
   if (sy > sr.bottom - my) dy = sy - (sr.bottom - my); else if (sy < sr.top + my) dy = sy - (sr.top + my);
-  if (dx) scroller.scrollLeft += dx; if (dy) scroller.scrollTop += dy;
+  if (dx) scroller.scrollLeft += dx * .25; if (dy) scroller.scrollTop += dy * .25;
 }
 
 function tick(now) {
@@ -1089,6 +1223,7 @@ function tick(now) {
 function update(dt) {
   const G = game; G.ft += dt; if (G.ft > .12) { G.ft = 0; G.f++; }
   const ir = innerRect(); G.mx = mouse.x - ir.left; G.my = mouse.y - ir.top;
+  { const n = G.ebullets.length; if (n > (G._eb || 0)) SFX.play("enemy"); G._eb = n; }
   const fx = G.x, fy = G.y + 10;
   if (G.ending) {
     const E = G.ending; E.t += dt;
@@ -1125,7 +1260,7 @@ function update(dt) {
     const b = G.boxes.find(b => Math.abs(s.x - b.x) < 22 && Math.abs(s.y - b.y) < 22);
     if (b) { hitBox(b); G.shots.splice(i, 1); continue; }
     const en = G.enemies.find(e => Math.hypot(s.x - e.x, s.y - e.y) < (e.big ? 36 : 20));
-    if (en) { if (s.turd) { if (en.big) { hitEnemy(en); hitEnemy(en); } else { en.hp = 1; hitEnemy(en); } burst(s.x, s.y, "#7a4a24", 10); } else hitEnemy(en); G.shots.splice(i, 1); continue; }
+    if (en) { if (s.turd) { if (en.big) { hitEnemy(en); hitEnemy(en); } else { en.hp = 1; hitEnemy(en); } burst(s.x, s.y, "#7a4a24", 10); } else { for (let k = 0; k < (s.pow || 1) && game.enemies.includes(en); k++) hitEnemy(en); } G.shots.splice(i, 1); continue; }
     if (s.t > .02 && chipAt(s.x, s.y, s.cards)) { G.shots.splice(i, 1); continue; }
     if (s.t > 1.4) G.shots.splice(i, 1);
   }
@@ -1240,18 +1375,47 @@ function renderShop() {
       const b = el("button", "item"); b.type = "button"; b.dataset.s = lv >= mx ? "equipped" : wallet.coins >= price ? "buy" : "locked";
       b.appendChild(el("span", "nm", name + "  Lv " + lv + (lv < mx ? " > " + (lv + 1) : " (max)") + (GUN_NEXT[key] && lv < mx ? " (" + GUN_NEXT[key](lv + 1) + ")" : ""))); b.appendChild(el("span", "pr", lv >= mx ? "Maxed" : price + " coins"));
       b.addEventListener("click", () => { if (lv >= mx) return; if (wallet.coins < price) { $("shop-msg").textContent = "You need " + (price - wallet.coins) + " more coins."; return; }
+        if (!askSure(name + " level " + (lv + 1), price)) return;
         wallet.coins -= price; wallet.gunLv = Object.assign({}, wallet.gunLv, {[key]: lv + 1}); $("shop-msg").textContent = name + " upgraded to level " + (lv + 1) + "."; saveWallet(true); renderShop(); });
       grid.appendChild(b);
     });
     sec.appendChild(grid); box.appendChild(sec);
+    const hs = el("section", "cat"); hs.appendChild(el("h3", null, "Helper time (every helper stays +2 seconds longer per level)")); const hg = el("div", "items");
+    const hl = wallet.helperLv || 0, hp = helperPrice(hl), hb = el("button", "item"); hb.type = "button"; hb.dataset.s = hl >= 20 ? "equipped" : wallet.coins >= hp ? "buy" : "locked";
+    hb.appendChild(el("span", "nm", "Helper time  Lv " + hl + (hl < 20 ? " > " + (hl + 1) : " (max)") + "  (" + helperSecs() + " s now)")); hb.appendChild(el("span", "pr", hl >= 20 ? "Maxed" : hp + " coins"));
+    hb.addEventListener("click", () => { if (hl >= 20) return; if (wallet.coins < hp) { $("shop-msg").textContent = "You need " + (hp - wallet.coins) + " more coins."; return; }
+      if (!askSure("Helper time level " + (hl + 1), hp)) return;
+      wallet.coins -= hp; wallet.helperLv = hl + 1; $("shop-msg").textContent = "Helpers now stay " + helperSecs() + " seconds."; saveWallet(true); renderShop(); });
+    hg.appendChild(hb); hs.appendChild(hg); box.appendChild(hs);
   }
   paintShopCoins();
 }
 function paintShopCoins() { document.querySelectorAll(".coin-n").forEach(e => { e.textContent = wallet.coins.toLocaleString(); }); }
+const SURE = [
+  "Are you sure?", "Really?", "You wanna buy this?", "Sure about that?", "Ya sure?", "Buy it?", "Last chance, champ.", "No take-backsies. Sure?",
+  "Hand over {p} coins for {n}?\n\nYour coins will be swallowed by a very greedy robot and never seen again. Absolutely sure you want this?",
+  "Upgrade {n} for {p} coins?\n\nThose coins are going to a good home (our pockets). No refunds, no crying, no take-backsies. Still wanna?",
+  "{n} for {p} coins. Your wallet just whimpered. Proceed anyway?",
+  "Are you absolutely, positively, cross-your-circuits sure you want {n}?",
+  "The coin goblin demands {p} coins for {n}. Feed him?",
+  "{p} coins is a lot of coins. {n} better be worth it. Is it?",
+  "Your future self says 'maybe save some coins.' Your present self says {n}. Buy it?",
+  "Buying {n}... this will definitely make you 12% cooler. Confirm?",
+  "Bold move, buying {n}. Your mom would be proud. Or confused. Buy it?",
+  "Swipe the coins for {n}? There's no receipt. There's no manager. Sure?",
+  "Ka-ching! Wait, not yet. {p} coins for {n}. Really?",
+  "Are you sure? The robot in the shop is crying already.",
+  "Pressing OK sends {p} coins on a one-way trip to Coin Heaven. Fine by you?",
+  "{n}: it's shiny, it's pricey, it's yours if you say yes. Say yes?",
+  "Hmm. {n}. {p} coins. Did you check the couch cushions first?"
+];
+function askSure(name, price) { const ok = confirm(SURE[Math.floor(Math.random() * SURE.length)].replace(/\{n\}/g, name).replace(/\{p\}/g, price)); if (ok) SFX.play("buy"); return ok; }
 function buy(id, cat, key) {
   const price = priceOf(id, cat, key);
   if (!owns(id, cat, key)) {
     if (wallet.coins < price) { $("shop-msg").textContent = "You need " + (price - wallet.coins) + " more coins. Go blast some crates!"; return; }
+    const nm = ((SHOP[cat] && SHOP[cat].items.find(it => it[0] === key)) || [0, key])[1];
+    if (!askSure(nm, price)) return;
     wallet.coins -= price; wallet.owned.push(ownKey(id, cat, key)); $("shop-msg").textContent = "Bought for " + price + " coins.";
   } else $("shop-msg").textContent = "";
   wallet.looks[id] = Object.assign({}, wallet.looks[id], {[cat]: key});
@@ -1393,7 +1557,7 @@ function drawWorld(g) {
   drawBricks(g, Math.max(vx, 0), Math.max(vy, 0), Math.min(vx + vw, W), Math.min(vy + vh, WORLD.h));
   drawBricks(g, Math.max(vx, WORLD.w - W), Math.max(vy, 0), Math.min(vx + vw, WORLD.w), Math.min(vy + vh, WORLD.h));
   g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(W, W, WORLD.w - 2 * W, 8); g.fillRect(W, W, 8, WORLD.h - 2 * W);
-  if (game.on && !game.ending && nearHome()) { g.font = "700 15px " + getComputedStyle(document.body).getPropertyValue("--display"); g.textAlign = "center"; g.fillStyle = "#fff2b0"; g.fillText("Press E to customize", HOUSE.x + HOUSE.w / 2, HOUSE.y - 62); }
+  if (game.on && !game.ending && nearHome()) { g.font = "700 15px " + getComputedStyle(document.body).getPropertyValue("--display"); g.textAlign = "center"; g.fillStyle = "#fff2b0"; g.fillText("Press E for upgrades", HOUSE.x + HOUSE.w / 2, HOUSE.y - 62); }
 }
 
 /* ================= standalone shell: menu, start/finish, shop at the house ================= */
@@ -1494,7 +1658,7 @@ function setMusic(on) { musicOn = on; try { localStorage.setItem("bot-blaster-mu
 function startMusic() { if (musicStarted || !musicOn) return; musicStarted = true; nextSong(); }
 ["pointerdown", "keydown"].forEach(ev => window.addEventListener(ev, startMusic, true));
 ["ghud-music", "m-music"].forEach(id => $(id).addEventListener("click", e => { e.stopPropagation(); setMusic(!musicOn); e.currentTarget.blur(); }));
-window.addEventListener("keydown", e => { if (e.key.toLowerCase() === "m" && $("shop").hidden) setMusic(!musicOn); });
+window.addEventListener("keydown", e => { if (e.key.toLowerCase() === "m" && $("shop").hidden) setMusic(!musicOn); if (e.key.toLowerCase() === "n" && $("shop").hidden) { const on = SFX.toggle(); if (game.on) game.floats.push({x: game.x, y: game.y - 60, t: 0, txt: on ? "Sound effects on" : "Sound effects off"}); } });
 paintMusic();
 $("m-reset").addEventListener("click", () => { if (game.on || !confirm("Erase all coins, gear, upgrades and high scores on this browser?")) return;
   wallet = cleanWallet(null); try { localStorage.removeItem(GAMEKEY); } catch (e) {} saveWallet(true); paintCoins(); $("hiscore").hidden = true; });
