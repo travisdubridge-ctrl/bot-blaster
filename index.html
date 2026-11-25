@@ -75,6 +75,7 @@ h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2}
     <p class="tag">Blast crates, drones and big silly bosses. Grab coins, bank them at home, gear up.</p>
     <p><span class="coins"><i></i><b class="coin-n">0</b></span> <span style="color:var(--muted)">banked</span></p>
     <div class="row"><button type="button" class="btn main" id="m-play">Play</button><button type="button" class="btn" id="m-shop">Customize</button><button type="button" class="btn" id="m-scores">High scores</button><button type="button" class="btn" id="m-music">Music on</button></div>
+    <p style="margin:0"><button type="button" class="mini" id="m-reset" style="opacity:.7">Reset saved game</button></p>
     <ul>
       <li><kbd>W A S D</kbd> move &nbsp; <kbd>mouse</kbd> aim &nbsp; <kbd>click</kbd> / <kbd>space</kbd> shoot</li>
       <li>Walk to your house to bank the coins you carry</li>
@@ -1495,6 +1496,8 @@ function startMusic() { if (musicStarted || !musicOn) return; musicStarted = tru
 ["ghud-music", "m-music"].forEach(id => $(id).addEventListener("click", e => { e.stopPropagation(); setMusic(!musicOn); e.currentTarget.blur(); }));
 window.addEventListener("keydown", e => { if (e.key.toLowerCase() === "m" && $("shop").hidden) setMusic(!musicOn); });
 paintMusic();
+$("m-reset").addEventListener("click", () => { if (game.on || !confirm("Erase all coins, gear, upgrades and high scores on this browser?")) return;
+  wallet = cleanWallet(null); try { localStorage.removeItem(GAMEKEY); } catch (e) {} saveWallet(true); paintCoins(); $("hiscore").hidden = true; });
 /* boot */
 game = idleState(); sizeGame(); paintCoins(); requestAnimationFrame(menuTick);
 </script>
