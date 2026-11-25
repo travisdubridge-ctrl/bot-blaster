@@ -565,7 +565,7 @@ function updateSlotUps(dt) {
     const n = wallet.carry; wallet.coins += n; wallet.carry = 0; saveWallet(true); paintCoins(); burst(G.x, G.y - 20, "#ffc857", 14); G.floats.push({x: G.x, y: G.y - 50, t: 0, txt: "Banked " + n + " coins!"}); } }
 }
 function drawSlotUps(g) {
-  game.slotUps.forEach(u => { if (u.t > 21 && game.f % 2) return; const bob = Math.sin(u.t * 4) * 4; g.save(); g.translate(u.x, u.y + bob);
+  game.slotUps.forEach(u => { if (u.t > 11 && game.f % 2) return; const bob = Math.sin(u.t * 4) * 4; g.save(); g.translate(u.x, u.y + bob);
     g.shadowColor = "#5df2a4"; g.shadowBlur = 16; g.fillStyle = "rgba(7,11,20,.85)"; g.strokeStyle = "#5df2a4"; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, 24, 0, Math.PI * 2); g.fill(); g.stroke(); g.shadowBlur = 0;
     g.fillStyle = "#5df2a4"; g.beginPath(); g.arc(-4, -6, 6, 0, Math.PI * 2); g.fill(); g.fillRect(-11, 1, 14, 10); g.fillRect(6, -6, 4, 14); g.fillRect(1, -1, 14, 4);
     g.font = "700 12px " + getComputedStyle(document.body).getPropertyValue("--display"); g.textAlign = "center"; g.fillText("+1 Helper slot", 0, 40); g.restore(); });
@@ -596,7 +596,8 @@ function ringSpot(idx) { const G = game, n = Math.max(1, helpersActive()), a = -
 function helpersActive() { const G = game; return (G.cheeks ? 1 : 0) + (G.curby ? 1 : 0) + G.allies.length; }
 function helperRoom() { const G = game; return 2 - helpersActive() - G.cheekUps.length - G.curbyUps.length - G.allyUps.length; }
 function dropHelper(x, y) {
-  if (Math.random() > .15) return;   // about 1 in 7 kills (2026-11-19: a bit more often than 1 in 10)
+  if (Math.random() > Math.min(.3, .15 + .005 * game.enemies.length)) return;   // ~1 in 7 kills, more often when swarmed (2026-11-25)
+  x = x + (game.x - x) * .5; y = y + (game.y - y) * .5;   // lands halfway to you, not out in the crowd
   const free = HELPERS.filter(k => !helperOut(k)); if (!free.length) return;
   const k = free[Math.floor(Math.random() * free.length)];
   if (k === "cheeks") game.cheekUps.push({x, y, t: 0}); else if (k === "curby") game.curbyUps.push({x, y, t: 0}); else game.allyUps.push({type: k, x, y, t: 0});
@@ -605,7 +606,7 @@ function updateCheeks(dt) {
   const G = game;
   for (let i = G.cheekUps.length - 1; i >= 0; i--) {
     const u = G.cheekUps[i]; u.t += dt;
-    if (u.t > 14) { G.cheekUps.splice(i, 1); continue; }
+    if (u.t > 24) { G.cheekUps.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30 && slotFree(u)) {
       G.cheekUps.splice(i, 1); G.cheeks = {x: G.x - 60, y: G.y + 10, t: 60, cool: .5, face: 1, f: 0, ft: 0, moving: false}; G.cheeks.t = helperSecs();
       SFX.play("up"); burst(u.x, u.y, "#8fd14f", 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: "Master Cheeks!"});
@@ -659,7 +660,7 @@ function updateCurby(dt) {
   const G = game;
   for (let i = G.curbyUps.length - 1; i >= 0; i--) {
     const u = G.curbyUps[i]; u.t += dt;
-    if (u.t > 14) { G.curbyUps.splice(i, 1); continue; }
+    if (u.t > 24) { G.curbyUps.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30 && slotFree(u)) {
       G.curbyUps.splice(i, 1); G.curby = {x: G.x + 60, y: G.y + 14, t: 60, mode: "hunt", ammo: 0, cool: 0, face: 1, f: 0, ft: 0, moving: false, prey: null, mt: 0}; G.curby.t = helperSecs();
       burst(u.x, u.y, "#ffa96b", 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: "Curby!"});
@@ -695,7 +696,7 @@ function updateCurby(dt) {
 function drawCurby(g) {
   const G = game;
   G.curbyUps.forEach(u => {                                                    // pickup: a little Curby in a bubble
-    if (u.t > 11 && G.f % 2) return;
+    if (u.t > 21 && G.f % 2) return;
     const bob = Math.sin(u.t * 4) * 4; g.save(); g.translate(u.x, u.y + bob);
     g.shadowColor = "#ffa96b"; g.shadowBlur = 14; g.fillStyle = "rgba(7,11,20,.85)"; g.strokeStyle = "#ffa96b"; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 22, 0, Math.PI * 2); g.fill(); g.stroke(); g.shadowBlur = 0;
     g.fillStyle = "#ffa96b"; g.beginPath(); g.arc(0, 1, 12, 0, Math.PI * 2); g.fill(); g.fillStyle = "#2a1a10"; g.fillRect(-5, -3, 3, 5); g.fillRect(3, -3, 3, 5);
@@ -742,7 +743,7 @@ function updateAllies(dt) {
   const G = game;
   for (let i = G.allyUps.length - 1; i >= 0; i--) {
     const u = G.allyUps[i]; u.t += dt;
-    if (u.t > 14) { G.allyUps.splice(i, 1); continue; }
+    if (u.t > 24) { G.allyUps.splice(i, 1); continue; }
     if (Math.hypot(u.x - G.x, u.y - (G.y + 6)) < 30 && slotFree(u)) {
       G.allyUps.splice(i, 1); G.allies.push({type: u.type, x: G.x - 60, y: G.y + 14, t: 60, cool: .8, face: 1, f: 0, ft: 0, moving: false, mode: "follow", n: 0}); G.allies[G.allies.length - 1].t = helperSecs();
       burst(u.x, u.y, ALLY[u.type][1], 18); G.floats.push({x: u.x, y: u.y, t: 0, txt: ALLY[u.type][0] + "!"});
@@ -841,7 +842,7 @@ function drawAllies(g) {
   G.bottles.forEach(b => { const u = b.t / b.dur, x = b.x0 + (b.x1 - b.x0) * u, y = b.y0 + (b.y1 - b.y0) * u - Math.sin(u * Math.PI) * 90; g.save(); g.translate(x, y); g.rotate(b.t * 14);
     g.fillStyle = "#3fae6a"; g.fillRect(-4, -6, 8, 13); g.fillRect(-2, -11, 4, 5); g.fillStyle = "#c9a227"; g.fillRect(-2, -12, 4, 2); g.fillStyle = "#f3e7c3"; g.fillRect(-4, -2, 8, 4); g.fillStyle = "rgba(255,255,255,.5)"; g.fillRect(-3, -5, 1, 9); g.restore(); });
   G.allyUps.forEach(u => {
-    if (u.t > 11 && G.f % 2) return; const [nm, col] = ALLY[u.type], bob = Math.sin(u.t * 4) * 4;
+    if (u.t > 21 && G.f % 2) return; const [nm, col] = ALLY[u.type], bob = Math.sin(u.t * 4) * 4;
     g.save(); g.translate(u.x, u.y + bob); g.shadowColor = col; g.shadowBlur = 14; g.fillStyle = "rgba(7,11,20,.85)"; g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 22, 0, Math.PI * 2); g.fill(); g.stroke(); g.shadowBlur = 0;
     drawAllyBody(g, {type: u.type, x: 0, y: 6, face: 1, f: G.f, moving: false, t: 60}, .62); g.font = font(12); g.textAlign = "center"; g.fillStyle = col; g.fillText(nm, 0, 38); g.restore();
   });
@@ -937,7 +938,7 @@ function drawAllyBody(g, A, sc) {
 function drawCheeks(g) {
   const G = game;
   G.cheekUps.forEach(u => {                                                 // dropped helmet pickup
-    if (u.t > 11 && G.f % 2) return;
+    if (u.t > 21 && G.f % 2) return;
     const bob = Math.sin(u.t * 4) * 4; g.save(); g.translate(u.x, u.y + bob);
     g.shadowColor = "#8fd14f"; g.shadowBlur = 14; g.fillStyle = "rgba(7,11,20,.85)"; g.strokeStyle = "#8fd14f"; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 22, 0, Math.PI * 2); g.fill(); g.stroke(); g.shadowBlur = 0;
     const P = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * 3 - 15, y * 3 - 15, w * 3, h * 3); };
@@ -1006,7 +1007,11 @@ function updateFoes(dt) {
   const G = game, ir = innerRect(), sr = scroller.getBoundingClientRect();
   G.time += dt; G.inv = Math.max(G.bubble > 0 ? .05 : 0, G.inv - dt);   /* shield bubble: nothing can hurt you (inv stays on) */ G.hurt = Math.max(0, G.hurt - dt); G.needT = Math.max(0, G.needT - dt);
   G.espawn -= dt;
-  if (G.espawn <= 0) { G.espawn = Math.max(3.5, 8 - G.time / 30) + Math.random() * 3; const lv = Math.floor((G.tk || 0) / 10); G.espawn = Math.max(.7, G.espawn * Math.pow(.85, lv)); if (G.enemies.length < Math.min(150, 4 + Math.round(1.5 * lv), 2 + Math.floor(G.time / 25) + Math.round(1.5 * lv))) { spawnEnemy(); if (lv >= 4 && Math.random() < .25) spawnEnemy(); } }   // every 10 kills: 15% faster spawns, 1-2 more drones (2026-11-19: a touch gentler than 20%/+2)
+  if (G.espawn <= 0) {                                                  // 2026-11-25: smooth ramp driven mostly by TIME so the screen fills up from the start and never jumps
+    const m = G.time / 60, target = Math.round(5 + 2.2 * m + .05 * (G.tk || 0));         // how many foes the screen "wants" right now
+    G.espawn = Math.max(.55, 2.2 - .1 * m) + Math.random() * .8;
+    if (G.enemies.length < Math.min(150, target)) spawnEnemy();
+  }   // (old kill-driven curve made the first few minutes empty, then exploded)
   G.enemies.forEach(e => {
     e.t += dt; e.born = Math.min(1, e.born + dt * 3); e.shake = Math.max(0, e.shake - dt);
     if (e.sucked || e.dancer) return;                                                      // being inhaled by Curby: no moving or shooting
