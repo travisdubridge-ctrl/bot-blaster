@@ -1,4 +1,4 @@
-# Bot Blaster
+# I Pee Infringement: The Game
 
 A little browser shooter. Blast crates, drones and silly bosses, grab coins, bank them at home, and gear up your bot.
 
