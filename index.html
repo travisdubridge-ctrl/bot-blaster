@@ -65,7 +65,7 @@ h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2}
 </head>
 <body>
 <canvas id="game" class="menu" aria-label="Bot Blaster: WASD to move, mouse to aim, click to shoot"></canvas>
-<div id="ghud" hidden><span class="coins"><i></i><b class="coin-n">0</b></span><span id="ghud-hp"></span><span id="ghud-score">Score 0</span><span id="ghud-round">Carrying 0</span><span id="ghud-gun"></span><span class="keys">WASD move · mouse aim · click or space shoot · walk home to bank coins · E at home: customize · Esc end round</span><span id="ghud-note"></span><button type="button" class="mini" id="ghud-stop">End round</button></div>
+<div id="ghud" hidden><span class="coins"><i></i><b class="coin-n">0</b></span><span id="ghud-hp"></span><span id="ghud-score">Score 0</span><span id="ghud-round">Carrying 0</span><span id="ghud-gun"></span><span class="keys">WASD move · mouse aim · click or space shoot · M music · walk home to bank coins · E at home: customize · Esc end round</span><span id="ghud-note"></span><button type="button" class="mini" id="ghud-music">Music on</button><button type="button" class="mini" id="ghud-stop">End round</button></div>
 <div id="gbanner" hidden></div>
 <div id="reviewask" hidden></div>
 <div id="menu">
@@ -73,7 +73,7 @@ h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2}
     <h1>Bot Blaster</h1>
     <p class="tag">Blast crates, drones and big silly bosses. Grab coins, bank them at home, gear up.</p>
     <p><span class="coins"><i></i><b class="coin-n">0</b></span> <span style="color:var(--muted)">banked</span></p>
-    <div class="row"><button type="button" class="btn main" id="m-play">Play</button><button type="button" class="btn" id="m-shop">Customize</button><button type="button" class="btn" id="m-scores">High scores</button></div>
+    <div class="row"><button type="button" class="btn main" id="m-play">Play</button><button type="button" class="btn" id="m-shop">Customize</button><button type="button" class="btn" id="m-scores">High scores</button><button type="button" class="btn" id="m-music">Music on</button></div>
     <ul>
       <li><kbd>W A S D</kbd> move &nbsp; <kbd>mouse</kbd> aim &nbsp; <kbd>click</kbd> / <kbd>space</kbd> shoot</li>
       <li>Walk to your house to bank the coins you carry</li>
@@ -1474,6 +1474,26 @@ $("hs-close").addEventListener("click", () => { $("hiscore").hidden = true; });
 $("m-play").addEventListener("click", startGame);
 $("m-shop").addEventListener("click", openShop);
 $("m-scores").addEventListener("click", () => showScores(null));
+/* ---------- music: shuffled playlist, a fresh random order every time through, never the same song twice in a row.
+   Browsers only allow sound after a click or key press, so it starts on the first one. M = music on/off (remembered). ---------- */
+const SONGS = ["Brisk Platform Groove", "Coin Rush", "Mission Start", "Neon Alley Chase", "Pixel Dash", "Pixel Victory", "Pixelated Fury", "Quiet Takeover", "Sector 7 March"];
+const music = new Audio(); music.volume = .45; let bag = [], lastSong = null, musicOn = true, musicStarted = false;
+try { musicOn = localStorage.getItem("bot-blaster-music") !== "off"; } catch (e) {}
+function nextSong() {
+  if (!bag.length) { bag = SONGS.slice(); for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    if (bag.length > 1 && bag[0] === lastSong) bag.push(bag.shift()); }
+  lastSong = bag.shift(); music.src = "music/" + encodeURIComponent(lastSong) + ".mp3"; if (musicOn) music.play().catch(() => {});
+}
+music.addEventListener("ended", nextSong);
+music.addEventListener("error", () => setTimeout(nextSong, 500));   // a missing/broken file just skips ahead
+function paintMusic() { ["ghud-music", "m-music"].forEach(id => { const b = $(id); if (b) b.textContent = musicOn ? "Music on" : "Music off"; }); }
+function setMusic(on) { musicOn = on; try { localStorage.setItem("bot-blaster-music", on ? "on" : "off"); } catch (e) {} paintMusic();
+  if (!on) music.pause(); else if (!musicStarted) startMusic(); else music.play().catch(() => {}); }
+function startMusic() { if (musicStarted || !musicOn) return; musicStarted = true; nextSong(); }
+["pointerdown", "keydown"].forEach(ev => window.addEventListener(ev, startMusic, true));
+["ghud-music", "m-music"].forEach(id => $(id).addEventListener("click", e => { e.stopPropagation(); setMusic(!musicOn); e.currentTarget.blur(); }));
+window.addEventListener("keydown", e => { if (e.key.toLowerCase() === "m" && $("shop").hidden) setMusic(!musicOn); });
+paintMusic();
 /* boot */
 game = idleState(); sizeGame(); paintCoins(); requestAnimationFrame(menuTick);
 </script>
