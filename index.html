@@ -1229,7 +1229,7 @@ function tick(now) {
 }
 function update(dt) {
   const G = game; G.ft += dt; if (G.ft > .12) { G.ft = 0; G.f++; }
-  aimNow();
+  const ir = innerRect(); aimNow();
   { const n = G.ebullets.length; if (n > (G._eb || 0)) SFX.play("enemy"); G._eb = n; }
   const fx = G.x, fy = G.y + 10;
   if (G.ending) {
