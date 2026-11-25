@@ -1008,9 +1008,10 @@ function updateFoes(dt) {
   G.time += dt; G.inv = Math.max(G.bubble > 0 ? .05 : 0, G.inv - dt);   /* shield bubble: nothing can hurt you (inv stays on) */ G.hurt = Math.max(0, G.hurt - dt); G.needT = Math.max(0, G.needT - dt);
   G.espawn -= dt;
   if (G.espawn <= 0) {                                                  // 2026-11-25: smooth ramp driven mostly by TIME so the screen fills up from the start and never jumps
-    const m = G.time / 60, target = Math.round(5 + 2.2 * m + .05 * (G.tk || 0));         // how many foes the screen "wants" right now
-    G.espawn = Math.max(.55, 2.2 - .1 * m) + Math.random() * .8;
-    if (G.enemies.length < Math.min(150, target)) spawnEnemy();
+    const m = G.time / 60, target = Math.min(150, Math.round(6 + 3 * m + .1 * m * m + .06 * (G.tk || 0)));   // how many foes the screen "wants" right now: ~12 at 2 min, ~24 at 5, ~46 at 10
+    const deficit = target - G.enemies.length;
+    G.espawn = Math.max(.3, 2.5 / (1 + Math.max(0, deficit) * .4)) + Math.random() * .3;                       // the emptier the screen, the faster they pour in (so strong players still feel swarmed)
+    if (deficit > 0) { spawnEnemy(); if (deficit > 8) spawnEnemy(); }
   }   // (old kill-driven curve made the first few minutes empty, then exploded)
   G.enemies.forEach(e => {
     e.t += dt; e.born = Math.min(1, e.born + dt * 3); e.shake = Math.max(0, e.shake - dt);
@@ -1573,7 +1574,7 @@ function anyBusy() { return false; }
 function drawBays() {}
 function newState(st) {
   let game;
-  game = {on: true, x: st.x, y: st.y, px: st.x - 40, py: st.y + 10, face: 1, moving: false, boxes: [], coins: [], shots: [], parts: [], floats: [], beams: [], flames: [], bolts: [], nades: [], booms: [], allies: [], allyUps: [], bottles: [], clouds: [], round: 0, cool: 0, spawn: .4, enemies: [], ebullets: [], ups: [], cheeks: null, cheekUps: [], curby: null, curbyUps: [], kills: 0, bossNeed: 10, slots: 1, slotUps: [], bombs: [], farts: [], rings: [], barrels: [], chunks: [], bossKills: 0, score: 0, pet: {mode: "follow"}, splats: [], hearts: [], heartT: 30, oil: [], fires: [], bubble: 0, bubbleUps: [], bubT: 40 + Math.random() * 30, hp: 5, inv: 0, hurt: 0, time: 0, espawn: 7, upT: 16, tempGun: null, needT: 0, flash: 0, f: 0, ft: 0,
+  game = {on: true, x: st.x, y: st.y, px: st.x - 40, py: st.y + 10, face: 1, moving: false, boxes: [], coins: [], shots: [], parts: [], floats: [], beams: [], flames: [], bolts: [], nades: [], booms: [], allies: [], allyUps: [], bottles: [], clouds: [], round: 0, cool: 0, spawn: .4, enemies: [], ebullets: [], ups: [], cheeks: null, cheekUps: [], curby: null, curbyUps: [], kills: 0, bossNeed: 10, slots: 1, slotUps: [], bombs: [], farts: [], rings: [], barrels: [], chunks: [], bossKills: 0, score: 0, pet: {mode: "follow"}, splats: [], hearts: [], heartT: 30, oil: [], fires: [], bubble: 0, bubbleUps: [], bubT: 40 + Math.random() * 30, hp: 5, inv: 0, hurt: 0, time: 0, espawn: 1.5, upT: 16, tempGun: null, needT: 0, flash: 0, f: 0, ft: 0,
     last: performance.now(), ending: null, mx: st.x + 120, my: st.y};
   return game;
 }
