@@ -1141,7 +1141,9 @@ function hitBox(b) {
   for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = 70 + Math.random() * 90; game.coins.push({x: b.x, y: b.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, t: Math.random() * 6}); }
 }
 function gunKey() { return game.tempGun || lookOf("commander").gun; }
+function aimNow() { const G = game; G.mx = mouse.x + cam.x; G.my = mouse.y + cam.y; }   // cursor -> world, always with the camera as it is RIGHT NOW (2026-11-25: fixes the laggy aim)
 function fire() {
+  aimNow();
   const gun = GUNS[gunKey()] || GUNS.blaster, ox = game.x, oy = game.y + 6;
   const a0 = Math.atan2(game.my - oy, game.mx - ox), mx = ox + Math.cos(a0) * gun.len, my = oy + Math.sin(a0) * gun.len;
   const lv = (wallet.gunLv || {})[gunKey()] || 0; game.gunLv = lv;
@@ -1210,19 +1212,19 @@ function follow() {
   const mx = sr.width * .36, my = sr.height * .34; let dx = 0, dy = 0;   // the bot stays in the middle ~30% of the screen; the camera eases after him
   if (sx > sr.right - mx) dx = sx - (sr.right - mx); else if (sx < sr.left + mx) dx = sx - (sr.left + mx);
   if (sy > sr.bottom - my) dy = sy - (sr.bottom - my); else if (sy < sr.top + my) dy = sy - (sr.top + my);
-  if (dx) scroller.scrollLeft += dx * .25; if (dy) scroller.scrollTop += dy * .25;
+  if (dx) scroller.scrollLeft += dx * .5; if (dy) scroller.scrollTop += dy * .5;
 }
 
 function tick(now) {
   if (!game.on) return;
   if (game.paused) { game.last = now; render(); requestAnimationFrame(tick); return; }   // review question showing: frozen, still drawn
   const dt = Math.min(.05, (now - game.last) / 1000); game.last = now;
-  update(dt); if (game.on) { follow(); render(); }
+  update(dt); if (game.on) { follow(); aimNow(); render(); }
   requestAnimationFrame(tick);
 }
 function update(dt) {
   const G = game; G.ft += dt; if (G.ft > .12) { G.ft = 0; G.f++; }
-  const ir = innerRect(); G.mx = mouse.x - ir.left; G.my = mouse.y - ir.top;
+  aimNow();
   { const n = G.ebullets.length; if (n > (G._eb || 0)) SFX.play("enemy"); G._eb = n; }
   const fx = G.x, fy = G.y + 10;
   if (G.ending) {
