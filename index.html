@@ -580,7 +580,7 @@ function hitEnemy(e) {
   if (e.big) {                                                                 // boss down: big payout, next one needs 10 more kills
     burst(e.x, e.y, "#ff7ab8", 30); game.floats.push({x: e.x, y: e.y - 30, t: 0, txt: e.kind === "junk" ? "Junkbot down! +10" : "Big drone down! +10"}); if (e.kind === "junk") igniteOil(e);
     for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, sp = e.kind === "junk" ? 380 + Math.random() * 420 : 80 + Math.random() * 120;   /* Junkbot's coins blast outward */ game.coins.push({x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: Math.random() * 6}); }
-    if (!game.enemies.some(x => x.big)) { game.wave = "clear"; game.kills = 0; game.bossNeed = Math.min(40, 10 + 5 * Math.floor((game.tk || 0) / 10)); }   /* next boss: 10 kills at level 1, +5 per level, max 40 (2026-11-19) */ if (!game.enemies.some(x => x.big)) game.bossKills = (game.bossKills || 0) + 1; if (!game.enemies.some(x => x.big) && game.bossKills % 2 === 1 && (game.slots || 1) < HELPERS.length) game.slotUps.push({x: e.x, y: e.y, t: 0}); addScore(PTS.boss, e.x, e.y - 40); paintHp(); return;                                       // next boss after another 10 kills (2026-11-19)
+    if (!game.enemies.some(x => x.big)) { game.wave = "clear"; banner("Boss down! Finish off the rest!", 2.2); game.kills = 0; game.bossNeed = Math.min(40, 10 + 5 * Math.floor((game.tk || 0) / 10)); }   /* next boss: 10 kills at level 1, +5 per level, max 40 (2026-11-19) */ if (!game.enemies.some(x => x.big)) game.bossKills = (game.bossKills || 0) + 1; if (!game.enemies.some(x => x.big) && game.bossKills % 2 === 1 && (game.slots || 1) < HELPERS.length) game.slotUps.push({x: e.x, y: e.y, t: 0}); addScore(PTS.boss, e.x, e.y - 40); paintHp(); return;                                       // next boss after another 10 kills (2026-11-19)
   }
   addScore(e.dancer ? PTS.dancer : e.ty ? 40 + 10 * (TYPES[e.ty].unlock) : e.dog ? PTS.dog : PTS.drone, e.x, e.y);
   game.kills++; game.tk = (game.tk || 0) + 1; if (game.tk % 10 === 0) game.floats.push({x: game.x, y: game.y - 70, t: 0, txt: "More drones! Level " + (1 + game.tk / 10)}); if (game.kills >= game.bossNeed && !game.wave && !game.enemies.some(x => x.big)) spawnBoss(); paintHp();
@@ -980,7 +980,7 @@ function drawCheeks(g) {
   g.fillStyle = "rgba(7,11,20,.7)"; g.fillRect(C.x - 22, y0 - 12, 44, 4); g.fillStyle = "#8fd14f"; g.fillRect(C.x - 22, y0 - 12, 44 * Math.min(1, C.t / helperSecs()), 4);
   g.fillText("Master Cheeks " + left + "s", C.x, y0 - 16);
 }
-function paintHp() { if (game.on && game._ph !== undefined && game.hp < game._ph) SFX.play(game.hp <= 0 ? "ko" : "hurt"); game._ph = game.hp; if (game.on) $("ghud-hp").textContent = "\u2665".repeat(Math.max(0, game.hp)) + "\u2661".repeat(Math.max(0, 5 - game.hp)); $("ghud-gun").textContent = (game.tempGun ? UPS[game.tempGun][0] + " (this round) · " : "") + "Helpers " + (typeof helpersActive === "function" && game.allies ? helpersActive() : 0) + "/" + (game.slots || 1) + " · " + (game.enemies && game.enemies.some(x => x.big) ? "BIG DRONE!" : "Big drone in " + Math.max(0, (game.bossNeed || 10) - (game.kills || 0)) + " kills"); }
+function paintHp() { if (game.on && game._ph !== undefined && game.hp < game._ph) SFX.play(game.hp <= 0 ? "ko" : "hurt"); game._ph = game.hp; if (game.on) $("ghud-hp").textContent = "\u2665".repeat(Math.max(0, game.hp)) + "\u2661".repeat(Math.max(0, 5 - game.hp)); $("ghud-gun").textContent = (game.tempGun ? UPS[game.tempGun][0] + " (this round) · " : "") + "Helpers " + (typeof helpersActive === "function" && game.allies ? helpersActive() : 0) + "/" + (game.slots || 1) + " · " + "Wave " + (game.waveN || 1) + " · " + (game.wave === "clear" ? "clear the screen!" : game.wave === "rest" ? "rest..." : game.enemies && game.enemies.some(x => x.big) ? "BOSS!" : "boss in " + Math.max(0, (game.bossNeed || 10) - (game.kills || 0)) + " kills"); }
 function typeAI(e, dt, dx, dy, d, on) {
   const G = game, ux = dx / d, uy = dy / d, shoot = (a, sp, o) => G.ebullets.push(Object.assign({x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t: 0}, o || {}));
   const keep = (lo, hi, spd) => { const w = !on ? 2.5 : d > hi ? 1 : d < lo ? -1 : 0; e.x += (ux * w * spd - uy * e.orb * 30) * dt; e.y += (uy * w * spd + ux * e.orb * 30) * dt; };
@@ -1003,19 +1003,19 @@ function typeAI(e, dt, dx, dy, d, on) {
     else { e.x += e.dx * 620 * dt; e.y += e.dy * 620 * dt; if (Math.hypot(G.x - e.x, G.y - e.y) < 34) hurtPlayer(false); if (e.pt > .8) { e.ph2 = "aim"; e.pt = 0; } }
   }
 }
+function banner(txt, secs) { const b = $("gbanner"); if (!game.on) return; b.textContent = txt; b.hidden = false; setTimeout(() => { if (b.textContent === txt) b.hidden = true; }, secs * 1000); }
 function updateFoes(dt) {
   const G = game, ir = innerRect(), sr = scroller.getBoundingClientRect();
   G.time += dt; G.inv = Math.max(G.bubble > 0 ? .05 : 0, G.inv - dt);   /* shield bubble: nothing can hurt you (inv stays on) */ G.hurt = Math.max(0, G.hurt - dt); G.needT = Math.max(0, G.needT - dt);
   G.espawn -= dt;
-  if (G.wave === "clear") {                                                 // a boss fight just ended: no new foes until the screen is clean
-    if (!G.enemies.length) { G.wave = "rest"; G.waveT = 6; G.floats.push({x: G.x, y: G.y - 70, t: 0, txt: "WAVE CLEARED! Catch your breath..."}); }
-  } else if (G.wave === "rest") {                                           // a few seconds of peace (grab coins, helpers, shop for upgrades)
-    G.waveT -= dt; if (G.waveT <= 0) { G.wave = null; G.kills = 0; G.espawn = .5; G.floats.push({x: G.x, y: G.y - 70, t: 0, txt: "NEXT WAVE!"}); }
-  } else if (G.espawn <= 0) {                                               // 2026-11-25: smooth ramp driven mostly by TIME
-    const m = G.time / 60, target = Math.min(150, Math.round(3 + 2 * m + .06 * m * m + .03 * (G.tk || 0)));   // how many foes the screen "wants": 3 at the start, ~7 at 1 min, ~11 at 2, ~19 at 5, ~38 at 10
-    const deficit = target - G.enemies.length;
-    G.espawn = Math.max(.3, 2.5 / (1 + Math.max(0, deficit) * .4)) + Math.random() * .3;                       // the emptier the screen, the faster they pour in
-    if (deficit > 0) { spawnEnemy(); if (deficit > 8) spawnEnemy(); }
+  if (G.wave === "clear") {                                                 // boss fight over: no new foes until the screen is clean
+    if (!G.enemies.length) { G.wave = "rest"; G.waveT = 6; banner("Wave " + (G.waveN || 1) + " cleared!", 2.2); SFX.play("up"); }
+  } else if (G.wave === "rest") {                                           // a few seconds of peace
+    G.waveT -= dt; if (G.waveT <= 0) { G.wave = null; G.waveN = (G.waveN || 1) + 1; G.kills = 0; G.bossNeed = Math.min(40, 8 + 3 * G.waveN); G.espawn = .8; banner("Wave " + G.waveN, 1.8); SFX.play("warn"); paintHp(); }
+  } else if (G.espawn <= 0) {                                               // 2026-11-26: a staircase, not a clock. Each wave allows a few more foes at once and they trickle in.
+    const wn = G.waveN || 1, cap = Math.round(4 + 1.2 * (wn - 1));          // wave 1: 4 at once, wave 3: 6, wave 6: 10, wave 10: 15, wave 15: 21
+    G.espawn = Math.max(.8, 2 - .07 * (wn - 1)) + Math.random() * .5;
+    if (G.enemies.filter(e => !e.big).length < Math.min(150, cap)) spawnEnemy();
   }
   G.enemies.forEach(e => {
     e.t += dt; e.born = Math.min(1, e.born + dt * 3); e.shake = Math.max(0, e.shake - dt);
