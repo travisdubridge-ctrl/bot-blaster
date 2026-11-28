@@ -4,7 +4,7 @@ Status (2026-11-28): planning. Only the 16-bit helper sprites exist so far (`art
 
 ## The loop
 
-Repeat once per helper until all 9 are unlocked:
+Repeat once per helper until all 10 are unlocked:
 
 1. **Top-down stage.** Clear a top-down shooter stage, the same engine as Endless mode.
 2. **Go inside.** Enter a building or an underground tunnel at the end of the stage.
@@ -29,11 +29,12 @@ Each theme parodies the helper's source, but is "intellectually different": no c
 | Pimpachu | Nightclub on top of a power plant |
 | Stinion | Mad scientist's underground lair |
 | Ninja Shellby | Sewer dojo behind a pizza place |
+| Sub-Par | Frozen temple / ice-cream factory freezer (new frost-ninja helper; freezes drones into ice cubes) |
 
 ## Tech notes
 
 - **FPS engine:** Build a Wolfenstein/Doom-style raycaster on canvas, plain JS with no libraries. Use the same single-page approach as the rest of the game.
-- **Helper sprites:** Billboards from `art16/helpers16.js` (`HELPERS16.build(name)` returns a 64x64 canvas). The gallery is `art16/gallery.html`.
+- **Helper sprites:** Billboards from `art16/helpers16.js` (`HELPERS16.build(name)` returns a 128x128 canvas, drawn by `art16/engine16.js`). The gallery is `art16/gallery.html`.
 - **Build order:**
   1. A raycaster prototype with one test level.
   2. The top-down to FPS transition, through a door or tunnel entrance.

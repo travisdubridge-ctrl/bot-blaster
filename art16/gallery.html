@@ -13,7 +13,7 @@
   .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .row button { background: #1a2540; color: #eaf2ff; border: 1px solid #33415f; border-radius: 4px; padding: 6px 12px; cursor: pointer; font: inherit; }
   .row button[aria-pressed="true"] { border-color: #ffc857; color: #ffc857; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 16px 24px 40px; max-width: 1200px; margin: 0 auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; padding: 16px 24px 40px; max-width: 1200px; margin: 0 auto; }
   .card { background: #121a30; border: 1px solid #26324f; border-radius: 8px; overflow: hidden; }
   .stage { height: 300px; display: grid; place-items: end center; padding-bottom: 18px; }
   .stage canvas { width: 256px; height: 256px; image-rendering: pixelated; image-rendering: crisp-edges; }
@@ -31,19 +31,20 @@
 <body>
 <header>
   <h1>Story Mode: 16-bit Helpers</h1>
-  <p>The 9 rescuable helpers, redrawn at 64x64 with 16-bit shading. Shown 4x size, pixel-sharp.</p>
+  <p>The 10 rescuable helpers, redrawn at 128x128 in a 16-bit fighting-game style: sculpted shading, fur and armor texture. Shown 2x, pixel-sharp.</p>
   <div class="row" role="group" aria-label="Background">
     <button data-bg="doom" aria-pressed="true">Corridor</button><button data-bg="lab">Lab</button><button data-bg="plain">Plain</button>
   </div>
 </header>
 <main class="grid" id="grid"></main>
+<script src="engine16.js"></script>
 <script src="helpers16.js"></script>
 <script>
   const grid = document.getElementById("grid");
   HELPERS16.list.forEach(k => {
     const info = HELPERS16.info(k), card = document.createElement("article"); card.className = "card";
     const st = document.createElement("div"); st.className = "stage doom";
-    const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; cv.setAttribute("aria-label", info.name);
+    const cv = document.createElement("canvas"); cv.width = 128; cv.height = 128; cv.setAttribute("aria-label", info.name);
     cv.getContext("2d").drawImage(HELPERS16.build(k), 0, 0); st.appendChild(cv);
     const h = document.createElement("h2"); h.textContent = info.name; const p = document.createElement("p"); p.textContent = info.blurb;
     card.append(st, h, p); grid.appendChild(card);
