@@ -6,29 +6,34 @@
   const DEF = {
     cheeks: {
       name: "Master Cheeks", blurb: "Space marine, fully armored... except the back. Sharpshooter, twerker, Spartan-laser finisher.",
-      body: S => {
-        const AR = "#4f7a2e", AR2 = "#5e8c38", US = "#3a3f48", BT = "#2e3a22";
-        S.R(38, 96, 14, 20, US); S.RR(34, 92, 20, 14, 4, AR2, {R: 5}); S.RR(36, 104, 16, 10, 3, AR, {R: 4}); S.RR(34, 110, 18, 10, 3, AR, {R: 4}); S.RR(30, 117, 26, 8, 3, BT, {R: 3});   // back leg
-        S.E(26, 88, 13, 14, "#ffb3a7", {R: 11}); S.E(37, 92, 13, 14, "#ffb3a7", {R: 11});                   // the cheeks
-        S.RR(40, 48, 44, 44, 10, US, {R: 10});                                                               // undersuit
-        S.RR(44, 48, 40, 30, 9, AR, {R: 11}); S.RR(50, 54, 26, 14, 5, AR2, {R: 6, soft: true});             // chest armor + plate
-        S.RR(48, 78, 32, 8, 3, AR2, {R: 4}); S.R(40, 85, 46, 7, BT, {R: 3});                                 // abdomen plate + belt
-        S.R(60, 96, 14, 18, US); S.RR(56, 90, 22, 14, 4, AR2, {R: 5}); S.RR(58, 103, 18, 10, 3, AR, {R: 4}); S.RR(56, 110, 20, 10, 3, AR, {R: 4}); S.RR(54, 117, 30, 8, 3, BT, {R: 3});   // front leg
-        S.E(58, 70, 8, 11, AR, {R: 6});                                                                      // back arm
-        S.R(56, 38, 20, 12, US);                                                                             // neck seal
-        S.RR(46, 6, 44, 38, 14, AR, {R: 13}); S.RR(52, 4, 30, 9, 4, AR2, {R: 4}); S.E(52, 27, 7, 10, AR2, {R: 5});   // helmet, crest, ear piece
-        S.RR(62, 17, 30, 17, 7, "#2fb8e8", {R: 7});                                                          // visor
-        S.RR(54, 62, 16, 12, 3, "#2b3446", {R: 4}); S.RR(66, 63, 50, 10, 3, "#2b3446", {R: 4}); S.R(112, 65, 16, 5, "#2b3446", {R: 2});   // rifle
-        S.RR(86, 56, 20, 7, 3, "#20262f", {R: 3}); S.RR(84, 72, 10, 16, 2, "#20262f", {R: 3});             // scope, magazine
-        S.E(84, 56, 14, 11, AR2, {R: 8});                                                                    // shoulder pad
-        S.RR(76, 62, 20, 12, 5, AR, {R: 5}); S.E(98, 76, 7, 6, US, {R: 4});                                  // forearm + hand on the grip
+      body: S => {   // rear view, looking back over his shoulder: the armor has a window cut out for the cheeks
+        const AR = "#4f7a2e", AR2 = "#5e8c38", US = "#3a3f48", BT = "#2e3a22", PK = "#ffb8a8";
+        S.R(46, 90, 15, 24, US); S.R(67, 90, 15, 24, US);                                                    // legs (undersuit)
+        S.RR(40, 38, 48, 52, 10, US, {R: 10});                                                               // undersuit torso
+        S.E(54, 88, 13, 14, PK, {R: 14}); S.E(74, 88, 13, 14, PK, {R: 14});                                  // THE CHEEKS (round, poking out below the belt)
+        S.RR(45, 103, 16, 8, 4, AR2, {R: 5}); S.RR(67, 103, 16, 8, 4, AR2, {R: 5});                          // thigh plates, below the cheeks
+        S.RR(46, 109, 15, 7, 3, AR, {R: 4}); S.RR(67, 109, 15, 7, 3, AR, {R: 4});                            // calf plates
+        S.RR(41, 114, 22, 10, 3, BT, {R: 3}); S.RR(65, 114, 22, 10, 3, BT, {R: 3});                          // boots
+        S.RR(38, 70, 52, 8, 3, BT, {R: 3});                                                                  // belt (frames the top)
+                S.RR(37, 36, 54, 36, 10, AR, {R: 11});                                                               // back armor
+        S.RR(47, 40, 34, 26, 6, AR2, {R: 8});                                                                // backpack
+        S.E(31, 64, 8, 15, AR, {R: 6}); S.E(30, 81, 7, 6, US, {R: 4});                                       // left arm + glove
+        S.E(35, 43, 13, 10, AR2, {R: 7}); S.E(93, 43, 13, 10, AR2, {R: 7});                                  // shoulder pads
+        S.L([[106, 40], [98, 110]], 8, "#2b3446", {R: 4}); S.RR(96, 70, 9, 12, 2, "#20262f", {R: 3});         // rifle held down at his side
+        S.E(97, 62, 8, 15, AR, {R: 6}); S.E(100, 78, 7, 6, US, {R: 4});                                      // right arm + glove
+        S.R(55, 30, 18, 9, US);                                                                              // neck seal
+        S.RR(45, 3, 40, 36, 14, AR, {R: 13}); S.RR(53, 1, 24, 9, 4, AR2, {R: 4});                            // helmet (back of the head) + crest
+        S.RR(77, 14, 15, 16, 6, "#2fb8e8", {R: 6});                                                          // visor, turned to look back at you
       },
       detail: (D, DL, T) => {
-        DL([[66, 21], [80, 21]], "#e8fbff"); DL([[66, 23], [72, 23]], "#e8fbff"); D(84, 27, 4, 2, "#b8f0ff"); D(64, 30, 20, 1, "#1a7aa8");
-        D(54, 58, 3, 3, "#ffe14a"); D(59, 58, 3, 3, "#ff6b3d"); D(64, 58, 3, 3, "#5df2a4");
-        DL([[30, 78], [31, 101]], "#c8706a"); D(20, 82, 4, 2, "#fff0ec"); D(31, 86, 4, 2, "#fff0ec"); D(18, 92, 5, 3, "#ff8f8f"); D(40, 96, 5, 3, "#ff8f8f");
-        DL([[50, 12], [50, 34]], T("#4f7a2e", 1)); DL([[70, 50], [80, 66]], T("#4f7a2e", 1)); D(124, 66, 3, 3, "#8fd14f"); D(88, 58, 12, 1, "#58607a");
-        D(43, 87, 6, 4, "#c9a24a"); D(64, 87, 6, 4, "#c9a24a");
+        DL([[64, 78], [64, 100]], "#c06a62"); D(47, 80, 6, 2, "#fff4ee"); D(67, 80, 6, 2, "#fff4ee"); D(48, 82, 2, 1, "#fff4ee"); D(68, 82, 2, 1, "#fff4ee");   // crack + shine
+        D(45, 92, 5, 3, "#ff8f8f"); D(78, 92, 5, 3, "#ff8f8f");                                               // a little sunburn blush
+        D(75, 85, 2, 1, "#e8304e"); D(78, 85, 2, 1, "#e8304e"); D(75, 86, 5, 1, "#e8304e"); D(76, 87, 3, 1, "#e8304e"); D(77, 88, 1, 1, "#e8304e");   // heart tattoo
+        [[36, 96], [92, 88], [38, 80]].forEach(([x, y]) => { D(x, y - 1, 1, 3, "#ffffff"); D(x - 1, y, 3, 1, "#ffffff"); });   // sparkles
+        D(56, 46, 16, 1, T("#5e8c38", 0)); D(56, 50, 16, 1, T("#5e8c38", 0)); D(56, 54, 16, 1, T("#5e8c38", 0));   // backpack vents
+        D(52, 59, 3, 3, "#ffe14a"); D(57, 59, 3, 3, "#5df2a4"); D(70, 58, 9, 5, "#3a5226");
+        D(71, 59, 1, 3, "#c9e6a0"); D(73, 59, 2, 1, "#c9e6a0"); D(73, 61, 2, 1, "#c9e6a0"); D(76, 59, 2, 3, "#c9e6a0");                      // stenciled "069"... ish
+        D(80, 17, 8, 2, "#e8fbff"); D(80, 20, 3, 2, "#e8fbff"); DL([[50, 10], [50, 32]], T("#4f7a2e", 1)); D(42, 73, 6, 4, "#c9a24a"); D(80, 73, 6, 4, "#c9a24a");
       }
     },
     curby: {
@@ -108,15 +113,13 @@
         S.R(44, 102, 9, 14, "#d8463a", {R: 4}); S.R(72, 102, 9, 14, "#d8463a", {R: 4});
         S.RR(34, 113, 26, 11, 5, "#a8302a", {R: 5}); S.RR(64, 113, 26, 11, 5, "#a8302a", {R: 5});
         S.E(62, 62, 48, 46, "#b6e04a", {R: 28});
-        S.CUT([[66, 60], [128, 22], [128, 100]]);
-        S.P([[68, 60], [108, 38], [108, 84]], "#3a1a2a", {flat: true}); S.E(96, 72, 12, 6, "#ff6f8f", {R: 4});
+        S.CUT([[64, 62], [128, 20], [128, 104]]);                                                            // open mouth: a real gap, you see what's behind him
         S.E(14, 70, 8, 11, "#a8d43f", {R: 5});
-        S.E(116, 22, 6, 5, "#c8ff9a", {R: 3}); S.E(122, 10, 5, 4, "#c8ff9a", {R: 3}); S.E(110, 8, 3, 3, "#c8ff9a", {R: 2});
+        S.E(116, 20, 6, 5, "#c8ff9a", {R: 3}); S.E(122, 8, 5, 4, "#c8ff9a", {R: 3}); S.E(110, 6, 3, 3, "#c8ff9a", {R: 2});
       },
       detail: (D, DL) => {
         D(58, 24, 12, 15, "#1a1a1a"); D(60, 26, 4, 5, "#ffffff"); D(66, 34, 2, 2, "#ffffff"); DL([[54, 20], [70, 18]], "#3a5a12"); DL([[54, 21], [70, 19]], "#3a5a12");
-        [[78, 56], [86, 52], [94, 48]].forEach(([x, y]) => D(x, y, 4, 4, "#ffffff")); [[80, 64], [88, 68], [96, 72]].forEach(([x, y]) => D(x, y, 4, 3, "#f4ead2"));
-        D(92, 70, 6, 1, "#ffb3c8"); D(40, 88, 2, 2, "#8aa83a"); D(50, 96, 2, 2, "#8aa83a"); D(30, 80, 2, 2, "#8aa83a");
+        D(40, 88, 2, 2, "#8aa83a"); D(50, 96, 2, 2, "#8aa83a"); D(30, 80, 2, 2, "#8aa83a");
       }
     },
     kong: {
@@ -153,29 +156,32 @@
     pimpachu: {
       name: "Pimpachu", blurb: "An electric rodent who made it big. Zaps a drone so hard it starts pole dancing.",
       body: S => {
-        const YE = "#ffd400";
-        S.P([[40, 104], [14, 94], [28, 86], [8, 72], [26, 70], [14, 52], [42, 72], [30, 76], [48, 86]], YE, {R: 5});   // lightning tail
-        S.RR(46, 114, 14, 10, 4, "#ffffff", {R: 4}); S.RR(68, 114, 14, 10, 4, "#ffffff", {R: 4});           // spats
-        S.E(64, 88, 24, 26, YE, {R: 14});                                                                     // body
-        S.E(29, 80, 7, 13, YE, {rot: .3, R: 5});                                                              // arm
-        S.E(41, 88, 16, 30, "#f3eaff", {tex: .5, fur: true, R: 10}); S.E(87, 88, 16, 30, "#eadcff", {tex: .5, fur: true, R: 10});   // fur coat
-        S.R(100, 58, 5, 64, "#2a2030", {R: 2}); S.E(102, 56, 7, 7, "#ffc22a", {R: 4});                       // cane
-        S.E(98, 72, 7, 10, YE, {rot: -.3, R: 5});                                                             // hand on cane
-        S.P([[44, 34], [34, 4], [54, 30]], YE, {R: 4}); S.P([[84, 34], [94, 4], [74, 30]], YE, {R: 4});      // ears
-        S.P([[38, 14], [34, 4], [42, 12]], "#2a2030", {flat: true}); S.P([[90, 14], [94, 4], [86, 12]], "#2a2030", {flat: true});
-        S.E(64, 48, 25, 22, YE, {R: 13});                                                                     // head
-        S.E(44, 57, 6, 5, "#ff4a4a", {R: 3}); S.E(84, 57, 6, 5, "#ff4a4a", {R: 3});                         // cheeks
-        S.RR(44, 40, 40, 10, 3, "#14101a", {flat: true});                                                     // shades
-        S.E(64, 26, 40, 8, "#7a3cc9", {R: 5}); S.RR(44, 4, 40, 24, 6, "#8a4ad9", {R: 9}); S.R(44, 19, 40, 6, "#ffc22a", {flat: true});   // hat
-        S.P([[80, 10], [92, -2], [106, 0], [112, 8], [88, 14]], "#ff6fb5", {R: 4, tex: .4});                 // feather
+        const YE = "#ffd400", BRN = "#a8641e";
+        S.P([[80, 98], [104, 88], [96, 80], [122, 64], [108, 58], [126, 34], [94, 54], [102, 62], [82, 72], [88, 80], [74, 88]], YE, {R: 4});   // lightning-bolt tail
+        S.P([[74, 88], [88, 80], [84, 92], [78, 98]], BRN, {R: 3});                                          // brown tail base
+        S.E(50, 120, 11, 5, YE, {R: 4}); S.E(78, 120, 11, 5, YE, {R: 4});                                    // feet
+        S.E(64, 93, 27, 27, YE, {R: 16});                                                                    // chubby body
+        S.E(36, 94, 12, 25, "#f3eaff", {tex: .5, fur: true, R: 9}); S.E(92, 94, 12, 25, "#eadcff", {tex: .5, fur: true, R: 9});   // open fur coat
+        S.R(98, 62, 4, 60, "#2a2030", {R: 2}); S.E(100, 60, 6, 6, "#ffc22a", {R: 4});                       // cane
+        S.E(42, 82, 7, 9, YE, {rot: .5, R: 5}); S.E(94, 74, 7, 9, YE, {rot: -.4, R: 5});                    // stubby arms
+        S.P([[38, 40], [22, -2], [30, -2], [54, 32]], YE, {R: 4}); S.P([[90, 40], [106, -2], [98, -2], [74, 32]], YE, {R: 4});   // long ears
+        S.P([[22, -2], [30, -2], [31, 12], [26, 14]], "#1e1a24", {flat: true}); S.P([[106, -2], [98, -2], [97, 12], [102, 14]], "#1e1a24", {flat: true});   // black ear tips
+        S.E(64, 54, 31, 26, YE, {R: 17});                                                                    // big round head
+        S.E(40, 64, 8, 8, "#ff3a3a", {R: 5}); S.E(88, 64, 8, 8, "#ff3a3a", {R: 5});                         // red cheeks
+        S.E(64, 32, 24, 5, "#7a3cc9", {rot: -.12, R: 4}); S.RR(50, 14, 28, 19, 5, "#8a4ad9", {R: 7}); S.R(50, 25, 28, 4, "#ffc22a", {flat: true});   // pimp hat, a little tilted
+        S.P([[74, 18], [84, 6], [96, 4], [100, 10], [80, 22]], "#ff6fb5", {R: 3, tex: .4});                 // feather
+        S.RR(51, 20, 11, 5, 2, "#14101a", {flat: true}); S.RR(65, 20, 11, 5, 2, "#14101a", {flat: true});    // shades parked on the hat
       },
       detail: (D, DL) => {
-        D(47, 42, 6, 2, "#8a8aff"); D(68, 42, 6, 2, "#8a8aff"); D(47, 44, 2, 1, "#ffffff"); D(68, 44, 2, 1, "#ffffff"); D(62, 41, 4, 2, "#14101a");
-        DL([[56, 62], [70, 61]], "#7a3a1a"); D(66, 62, 3, 2, "#ffc22a"); D(64, 58, 2, 1, "#2a1a10");
-        [[50, 72], [53, 77], [57, 81], [61, 84], [65, 85], [69, 84], [73, 81], [77, 77], [80, 72]].forEach(([x, y]) => D(x, y, 3, 3, "#ffc22a"));
-        D(60, 86, 10, 10, "#ffe680"); D(62, 88, 6, 6, "#ffc22a"); D(64, 89, 2, 4, "#fff6b0");
-        [[34, 70], [32, 84], [35, 98], [92, 70], [94, 84], [91, 98]].forEach(([x, y]) => D(x, y, 3, 3, "#b69cff"));
-        DL([[86, 6], [110, 4]], "#ffb3d8"); D(100, 54, 2, 2, "#fff6b0"); D(96, 76, 3, 3, "#c0c8ff");
+        [[50, 48], [71, 48]].forEach(([x, y]) => { D(x + 1, y, 6, 8, "#14101a"); D(x, y + 1, 8, 6, "#14101a"); D(x + 2, y + 1, 3, 3, "#ffffff"); D(x + 5, y + 5, 1, 1, "#ffffff"); });   // beady eyes
+        D(63, 58, 2, 1, "#3a2010");                                                                          // nose
+        DL([[57, 63], [60, 65], [63, 63]], "#3a2010"); DL([[63, 63], [66, 65], [70, 62]], "#3a2010"); D(65, 65, 2, 2, "#ffc22a");   // smirk + gold tooth
+        D(37, 61, 3, 2, "#ff9a9a"); D(85, 61, 3, 2, "#ff9a9a");
+        D(52, 21, 4, 1, "#8a8aff"); D(66, 21, 4, 1, "#8a8aff");
+        [[46, 78], [49, 83], [53, 87], [58, 90], [63, 91], [68, 90], [73, 87], [77, 83], [80, 78]].forEach(([x, y]) => D(x, y, 3, 3, "#ffc22a"));   // gold chain
+        D(58, 92, 11, 11, "#ffe680"); D(60, 94, 7, 7, "#ffc22a"); D(63, 95, 1, 5, "#fff6b0"); D(61, 96, 5, 1, "#fff6b0"); D(61, 98, 5, 1, "#fff6b0");   // medallion
+        [[32, 80], [30, 94], [33, 108], [94, 82], [96, 96], [93, 110]].forEach(([x, y]) => D(x, y, 3, 3, "#b69cff"));
+        D(98, 58, 2, 2, "#fff6b0");
       }
     },
     stinion: {
@@ -223,36 +229,38 @@
         D(30, 46, 3, 3, "#ffc2dc");
       }
     },
-    subpar: {
-      name: "Sub-Par", blurb: "A frost ninja who's slightly below average at everything... except freezing drones solid into ice cubes.",
+    scrubzero: {
+      name: "Scrub-Zero", blurb: "A legendary frost ninja who is a total scrub at everything... except freezing drones solid into ice cubes.",
       body: S => {
-        const BL = "#3a8fe0", BD = "#2a6fc0", SU = "#2c3852", IC = "#bfe6ff";
-        S.R(46, 92, 14, 24, SU, {R: 6}); S.R(70, 92, 14, 24, SU, {R: 6});                                     // legs
-        S.RR(46, 97, 14, 13, 3, IC, {R: 4}); S.RR(70, 97, 14, 13, 3, IC, {R: 4});                            // shin guards
-        S.RR(40, 112, 24, 12, 4, BL, {R: 4}); S.RR(66, 112, 24, 12, 4, BL, {R: 4});                          // boot wraps
-        S.RR(42, 48, 46, 48, 12, SU, {R: 12});                                                                // undersuit
-        S.E(64, 80, 15, 10, "#262f42", {soft: true, R: 8});                                                   // the little belly (sub-par)
-        S.P([[50, 50], [78, 50], [84, 94], [44, 94]], BL, {R: 9});                                            // tabard
-        S.RR(39, 82, 52, 8, 3, BD, {R: 3}); S.E(64, 86, 5, 5, IC, {R: 3});                                    // sash + knot
-        S.E(38, 55, 12, 10, IC, {R: 7}); S.E(90, 55, 12, 10, IC, {R: 7});                                     // shoulder guards
-        S.E(29, 70, 8, 16, SU, {R: 6}); S.RR(21, 80, 15, 17, 4, IC, {R: 5}); S.E(29, 100, 8, 7, SU, {R: 5}); // arm in guard
-        S.E(101, 68, 8, 14, SU, {R: 6}); S.RR(97, 75, 16, 14, 4, IC, {R: 5}); S.E(108, 92, 9, 7, SU, {R: 5}); // casting arm
-        S.RR(97, 96, 24, 22, 3, "#a8e8ff", {R: 5, tex: .25});                                                 // ICE CUBE (with a drone inside)
-        S.E(64, 30, 21, 23, BL, {R: 13});                                                                     // hood
-        S.RR(50, 22, 28, 12, 5, "#f0c8a0", {R: 5});                                                           // eye slot
-        S.RR(48, 31, 32, 17, 6, BD, {R: 6});                                                                  // mask
-        S.E(90, 44, 7, 4, "#e8f8ff", {R: 3}); S.E(99, 40, 5, 3, "#e8f8ff", {R: 2});                         // frosty breath
+        const BL = "#2f6fd0", BD = "#2458b0", SU = "#171d2a", ST = "#9aa6b8";
+        S.P([[48, 82], [61, 82], [53, 117], [38, 117]], SU, {R: 6}); S.P([[67, 82], [80, 82], [92, 117], [77, 117]], SU, {R: 6});   // wide fighting stance
+        S.P([[40, 102], [53, 102], [52, 116], [38, 116]], BL, {R: 4}); S.P([[77, 102], [90, 102], [92, 116], [78, 116]], BL, {R: 4});   // shin wraps
+        S.RR(30, 115, 24, 9, 3, SU, {R: 3}); S.RR(76, 115, 24, 9, 3, SU, {R: 3});                            // tabi boots
+        S.P([[38, 42], [90, 42], [82, 84], [46, 84]], SU, {R: 12});                                          // V-shaped torso
+        S.E(54, 52, 11, 8, "#1f2738", {soft: true, R: 7}); S.E(74, 52, 11, 8, "#1f2738", {soft: true, R: 7});   // pecs under the suit
+        for (let r = 0; r < 2; r++) for (let c = 0; c < 2; c++) S.RR(57 + c * 8, 62 + r * 7, 7, 6, 2, "#1f2738", {soft: true, R: 3});   // abs
+        S.P([[44, 42], [56, 42], [64, 60], [72, 42], [84, 42], [76, 72], [52, 72]], BL, {R: 7});             // blue vest with the black V
+        S.P([[51, 76], [77, 76], [82, 106], [46, 106]], BL, {R: 7});                                         // tabard
+        S.RR(44, 71, 40, 8, 2, BD, {R: 3}); S.RR(57, 69, 14, 12, 2, ST, {R: 4});                             // belt + steel plate
+        S.E(36, 46, 12, 9, ST, {R: 6});                                                                      // steel shoulder guard
+        S.E(30, 60, 8, 13, SU, {rot: .35, R: 6}); S.RR(30, 66, 19, 10, 4, BL, {R: 4}); S.E(51, 70, 7, 7, SU, {R: 5});   // guard arm, fist cocked
+        S.E(94, 54, 13, 8, SU, {rot: -.25, R: 6}); S.RR(98, 54, 18, 10, 4, BL, {R: 4}); S.E(117, 60, 7, 6, SU, {R: 4});   // arm out, palm up
+        S.RR(102, 30, 24, 24, 3, "#a8e8ff", {R: 5, tex: .25});                                               // ICE CUBE with a drone frozen inside
+        S.E(64, 25, 17, 19, SU, {R: 11});                                                                    // black hood
+        S.RR(52, 18, 24, 8, 3, "#d9a07a", {R: 3});                                                           // eye slot
+        S.P([[49, 26], [79, 26], [76, 38], [64, 43], [52, 38]], BL, {R: 6});                                 // blue mask
       },
       detail: (D, DL) => {
-        D(53, 26, 9, 4, "#e8f8ff"); D(66, 26, 9, 4, "#e8f8ff"); D(57, 27, 3, 3, "#2a6fc0"); D(69, 27, 3, 3, "#2a6fc0"); D(57, 27, 1, 1, "#ffffff"); D(69, 27, 1, 1, "#ffffff");
-        DL([[51, 23], [61, 26]], "#5a3a2a"); DL([[77, 23], [67, 26]], "#5a3a2a");
-        D(63, 34, 2, 11, "#bfe6ff"); D(58, 39, 12, 2, "#bfe6ff"); D(60, 36, 2, 2, "#bfe6ff"); D(66, 36, 2, 2, "#bfe6ff"); D(60, 42, 2, 2, "#bfe6ff"); D(66, 42, 2, 2, "#bfe6ff");   // snowflake on the mask
-        D(104, 102, 10, 6, "#6a5a9a"); D(103, 101, 4, 1, "#8a9bbf"); D(111, 101, 4, 1, "#8a9bbf"); D(107, 104, 3, 2, "#ff4d6d");   // frozen drone
-        DL([[99, 98], [99, 114]], "#ffffff"); DL([[100, 98], [110, 98]], "#ffffff"); D(116, 110, 2, 2, "#ffffff");
-        [[92, 90], [122, 92], [118, 120], [94, 120], [88, 100]].forEach(([x, y]) => { D(x, y, 1, 3, "#e8f8ff"); D(x - 1, y + 1, 3, 1, "#e8f8ff"); });
-        DL([[52, 60], [64, 70]], "#2a6fc0"); DL([[76, 60], [64, 70]], "#2a6fc0");
+        D(54, 20, 8, 4, "#f4fcff"); D(66, 20, 8, 4, "#f4fcff"); D(55, 21, 6, 2, "#bfeaff"); D(67, 21, 6, 2, "#bfeaff");   // glowing white ice eyes
+        DL([[52, 18], [61, 21]], "#0a0e16"); DL([[76, 18], [67, 21]], "#0a0e16");
+        DL([[56, 30], [64, 36], [72, 30]], "#5a9af0"); DL([[64, 36], [64, 41]], "#5a9af0");                // mask seams
+        D(63, 71, 2, 8, "#e8f4ff"); D(60, 74, 8, 2, "#e8f4ff"); D(61, 72, 1, 1, "#e8f4ff"); D(66, 72, 1, 1, "#e8f4ff"); D(61, 77, 1, 1, "#e8f4ff"); D(66, 77, 1, 1, "#e8f4ff");   // snowflake on the belt plate
+        D(108, 38, 12, 7, "#6a5a9a"); D(107, 37, 4, 1, "#8a9bbf"); D(117, 37, 4, 1, "#8a9bbf"); D(112, 40, 3, 2, "#ff4d6d");   // frozen drone
+        DL([[104, 32], [104, 50]], "#ffffff"); DL([[105, 32], [118, 32]], "#ffffff"); D(121, 48, 2, 2, "#ffffff");
+        [[98, 26], [126, 58], [96, 48], [112, 22], [124, 26]].forEach(([x, y]) => { D(x, y - 1, 1, 3, "#e8f8ff"); D(x - 1, y, 3, 1, "#e8f8ff"); });   // frost sparkles
+        D(34, 43, 4, 2, "#e0e8f4"); D(59, 70, 3, 1, "#e0e8f4");
       }
-    }
+    },
   };
   const cache = {};
   window.HELPERS16 = {

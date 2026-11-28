@@ -29,7 +29,7 @@ Each theme parodies the helper's source, but is "intellectually different": no c
 | Pimpachu | Nightclub on top of a power plant |
 | Stinion | Mad scientist's underground lair |
 | Ninja Shellby | Sewer dojo behind a pizza place |
-| Sub-Par | Frozen temple / ice-cream factory freezer (new frost-ninja helper; freezes drones into ice cubes) |
+| Scrub-Zero | Frozen temple / ice-cream factory freezer (frost-ninja helper; freezes drones into ice cubes) |
 
 ## Tech notes
 
