@@ -1016,8 +1016,9 @@ function updateFoes(dt) {
     G.waveT -= dt; if (G.waveT <= 0) { G.wave = null; G.waveN = (G.waveN || 1) + 1; G.kills = 0; G.bossNeed = Math.min(40, 8 + 3 * G.waveN); G.espawn = .8; banner("Wave " + G.waveN, 1.8); SFX.play("warn"); paintHp(); }
   } else if (G.espawn <= 0) {                                               // 2026-11-26: a staircase, not a clock. Each wave allows a few more foes at once and they trickle in.
     const wn = G.waveN || 1, cap = waveCap(wn), alive = G.enemies.filter(e => !e.big).length, deficit = cap - alive;   // wave 1: 4 at once, 4: 9, 7: 15, 10: 23, 15: 38
-    G.espawn = Math.max(.4, 1.8 / (1 + Math.max(0, deficit) * .3)) + Math.random() * .3;                         // the further under the limit, the faster they come
-    if (deficit > 0) spawnEnemy();
+    const fill = alive / cap;                                                                                     // 2026-11-28: one-at-a-time spawning couldn't keep up with an upgraded player (screen sat at 10-25% of cap)
+    if (deficit > 0) { const n = fill < .7 ? Math.ceil(deficit * .6) : 1; for (let i = 0; i < n; i++) spawnEnemy(); }   // under 70% full: a pack drops in
+    G.espawn = fill < .7 ? .5 : 1.2 + Math.random() * .4;
   }
   G.enemies.forEach(e => {
     e.t += dt; e.born = Math.min(1, e.born + dt * 3); e.shake = Math.max(0, e.shake - dt);
