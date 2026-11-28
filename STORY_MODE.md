@@ -21,7 +21,7 @@ Each theme parodies the helper's source, but is "intellectually different": no c
 | Helper | FPS level idea |
 |---|---|
 | Master Cheeks | Crashed space station shaped like a giant donut |
-| Curby | Squishy candy-cloud castle, floors that bounce |
+| Sirby | Squishy candy-cloud castle, floors that bounce |
 | Drunky Plumbo | Flooded sewer pipes plus a wine cellar |
 | Sweaty Sprintz | Steamy gym and sauna; speed boost pads |
 | Burpo Man | Neon arcade maze; ghost-drones; beans as power pellets |
