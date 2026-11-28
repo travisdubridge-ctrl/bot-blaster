@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Story Mode prototype: The Freezer</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #05070d; overflow: hidden; color: #eaf2ff; font: 15px/1.5 system-ui, sans-serif; }
+  #screen { position: fixed; inset: 0; margin: auto; image-rendering: pixelated; image-rendering: crisp-edges; cursor: crosshair; }
+  .over { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(5, 7, 13, .82); z-index: 5; }
+  .over[hidden] { display: none; }
+  .box { background: #10172a; border: 2px solid #ffc857; border-radius: 8px; padding: 26px 30px; width: min(92vw, 520px); text-align: center; }
+  .box h1 { margin: 0 0 4px; color: #ffc857; font-size: 1.7rem; letter-spacing: .03em; }
+  .box h2 { margin: 0 0 14px; color: #9aa8c7; font-size: 1rem; font-weight: 500; }
+  .box p { margin: 8px 0; }
+  .box ul { text-align: left; margin: 12px auto; padding-left: 20px; color: #c8d2ea; max-width: 380px; }
+  .box kbd { background: #1a2540; border: 1px solid #33415f; border-radius: 3px; padding: 0 5px; font: inherit; color: #fff; }
+  .btn { background: #ffc857; color: #1a1204; border: 0; border-radius: 4px; padding: 10px 18px; font: 700 1rem system-ui, sans-serif; cursor: pointer; margin: 6px; }
+  .btn.alt { background: #1a2540; color: #eaf2ff; border: 1px solid #33415f; }
+  a.btn { display: inline-block; text-decoration: none; }
+  .stats { color: #c8d2ea; }
+</style>
+</head>
+<body>
+<canvas id="screen" width="320" height="200" aria-label="Story mode first-person view"></canvas>
+<div class="over" id="title">
+  <div class="box">
+    <h1>STORY MODE</h1>
+    <h2>Prototype level: The Freezer. Rescue Scrub-Zero.</h2>
+    <ul>
+      <li><kbd>W A S D</kbd> move &nbsp; <kbd>Shift</kbd> run</li>
+      <li><kbd>Mouse</kbd> look (or <kbd>&larr;</kbd> <kbd>&rarr;</kbd> to turn)</li>
+      <li><kbd>Click</kbd> / <kbd>Space</kbd> shoot &nbsp; <kbd>E</kbd> use</li>
+      <li><kbd>Tab</kbd> map &nbsp; <kbd>Esc</kbd> free the mouse &nbsp; <kbd>N</kbd> sound on/off</li>
+    </ul>
+    <button class="btn" id="start">Click to start</button>
+  </div>
+</div>
+<div class="over" id="dead" hidden>
+  <div class="box"><h1>YOU GOT SCRAPPED</h1><p class="stats" id="dead-stats"></p><button class="btn" id="retry">Try again</button><a class="btn alt" href="../index.html">Back to the game</a></div>
+</div>
+<div class="over" id="won" hidden>
+  <div class="box"><h1>SCRUB-ZERO RESCUED!</h1><h2>"Thanks, scrub. I mean... thanks."</h2><p class="stats" id="won-stats"></p><button class="btn" id="again">Play again</button><a class="btn alt" href="../index.html">Back to the game</a></div>
+</div>
+<script src="../art16/engine16.js"></script>
+<script src="../art16/helpers16.js"></script>
+<script src="fps.js"></script>
+</body>
+</html>

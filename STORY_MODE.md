@@ -1,6 +1,6 @@
 # Story Mode plan
 
-Status (2026-11-28): planning. Only the 16-bit helper sprites exist so far (`art16/`). Endless mode is the live game in `index.html`.
+Status (2026-11-28): step 1 done. The FPS prototype is playable at `story/fps.html` ("Story Mode: Preview" on the main menu). It's one test level, "The Freezer", where you rescue Scrub-Zero. The 16-bit helper sprites are in `art16/`. Endless mode is the live game in `index.html`.
 
 ## The loop
 
@@ -33,7 +33,12 @@ Each theme parodies the helper's source, but is "intellectually different": no c
 
 ## Tech notes
 
-- **FPS engine:** Build a Wolfenstein/Doom-style raycaster on canvas, plain JS with no libraries. Use the same single-page approach as the rest of the game.
+- **FPS engine:** `story/fps.js` is a Wolfenstein/Doom-style raycaster on canvas, plain JS with no libraries.
+  - Renders at 320x200 with code-generated textures, sliding doors, distance fog, and billboard sprites.
+  - Two enemy types: drones and robot dogs. Health and ammo pickups.
+  - Doom-style HUD with the bot's face, plus a Tab map.
+  - The level is an ASCII `MAP` at the top of the file.
+  - Headless-test gotcha: pointer lock makes headless Chromium crawl, so stub out `requestPointerLock` in tests.
 - **Helper sprites:** Billboards from `art16/helpers16.js` (`HELPERS16.build(name)` returns a 128x128 canvas, drawn by `art16/engine16.js`). The gallery is `art16/gallery.html`.
 - **Build order:**
   1. A raycaster prototype with one test level.
