@@ -94,7 +94,8 @@ h1,h2,h3{font-family:var(--display);margin:0;line-height:1.2}
     <div class="shop-body">
       <div class="shop-prev"><canvas id="shop-cv" width="112" height="112" aria-label="Preview"></canvas>
         <p class="hint">Hover an item to try it on. Click to buy or switch. Gear you buy is yours for keeps.</p>
-        <p class="hint" id="shop-msg" aria-live="polite"></p></div>
+        <p class="hint" id="shop-msg" aria-live="polite"></p>
+        <button type="button" class="mini" id="shop-reset" style="margin-top:14px;border-color:#ff6b7d;color:#ff8a9a">Reset &amp; start over</button></div>
       <div id="shop-cats"></div>
     </div>
   </div>
@@ -1675,8 +1676,13 @@ function startMusic() { if (musicStarted || !musicOn) return; musicStarted = tru
 ["ghud-music", "m-music"].forEach(id => $(id).addEventListener("click", e => { e.stopPropagation(); setMusic(!musicOn); e.currentTarget.blur(); }));
 window.addEventListener("keydown", e => { if (e.key.toLowerCase() === "m" && $("shop").hidden) setMusic(!musicOn); if (e.key.toLowerCase() === "n" && $("shop").hidden) { const on = SFX.toggle(); if (game.on) game.floats.push({x: game.x, y: game.y - 60, t: 0, txt: on ? "Sound effects on" : "Sound effects off"}); } });
 paintMusic();
-$("m-reset").addEventListener("click", () => { if (game.on || !confirm("Erase all coins, gear, upgrades and high scores on this browser?")) return;
-  wallet = cleanWallet(null); try { localStorage.removeItem(GAMEKEY); } catch (e) {} saveWallet(true); paintCoins(); $("hiscore").hidden = true; });
+function resetAll() { wallet = cleanWallet(null); try { localStorage.removeItem(GAMEKEY); } catch (e) {} saveWallet(true); paintCoins(); $("hiscore").hidden = true; }
+$("m-reset").addEventListener("click", () => { if (game.on || !confirm("Erase all coins, gear, upgrades and high scores on this browser?")) return; resetAll(); });
+$("shop-reset").addEventListener("click", () => {                                // 2026-11-28: wipe everything from inside the Upgrades menu
+  if (!confirm("RESET & START OVER?\n\nThis nukes ALL your coins, guns, upgrades, pets, gear and high scores. Back to a naked robot with a pea shooter.")) return;
+  if (!confirm("For real? There's no undo. Your robot will forget everything, like a goldfish.")) return;
+  resetAll(); if (game.on) { wallet.carry = 0; game.tempGun = null; paintHp(); }
+  renderShop(); drawShopPreview(); if (typeof drawBays === "function") drawBays(); $("shop-msg").textContent = "Wiped clean. Fresh start!"; });
 /* boot */
 game = idleState(); sizeGame(); paintCoins(); requestAnimationFrame(menuTick);
 </script>
