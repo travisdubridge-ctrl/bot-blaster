@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Story Mode: 16-bit Helpers</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b1020; color: #eaf2ff; font: 15px/1.5 system-ui, sans-serif; }
+  header { padding: 24px 24px 8px; max-width: 1200px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 1.6rem; color: #ffc857; letter-spacing: .02em; }
+  header p { margin: 0; color: #9aa8c7; }
+  .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .row button { background: #1a2540; color: #eaf2ff; border: 1px solid #33415f; border-radius: 4px; padding: 6px 12px; cursor: pointer; font: inherit; }
+  .row button[aria-pressed="true"] { border-color: #ffc857; color: #ffc857; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 16px 24px 40px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #121a30; border: 1px solid #26324f; border-radius: 8px; overflow: hidden; }
+  .stage { height: 300px; display: grid; place-items: end center; padding-bottom: 18px; }
+  .stage canvas { width: 256px; height: 256px; image-rendering: pixelated; image-rendering: crisp-edges; }
+  .stage.plain { background: #1a2540; }
+  .stage.doom { background:
+      linear-gradient(#0000 62%, #2a2418 62%, #3a3020 100%),
+      repeating-linear-gradient(0deg, #3a1f17 0 2px, #0000 2px 24px),
+      repeating-linear-gradient(90deg, #3a1f17 0 2px, #0000 2px 48px),
+      linear-gradient(#6b3a26, #4a2618); }
+  .stage.lab { background: linear-gradient(#0000 62%, #1c2a2a 62%, #253535 100%), repeating-linear-gradient(90deg, #34484a 0 30px, #2a3c3e 30px 32px), #34484a; }
+  .card h2 { margin: 0; padding: 10px 14px 0; font-size: 1.05rem; }
+  .card p { margin: 0; padding: 4px 14px 14px; color: #9aa8c7; font-size: .9rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Story Mode: 16-bit Helpers</h1>
+  <p>The 9 rescuable helpers, redrawn at 64x64 with 16-bit shading. Shown 4x size, pixel-sharp.</p>
+  <div class="row" role="group" aria-label="Background">
+    <button data-bg="doom" aria-pressed="true">Corridor</button><button data-bg="lab">Lab</button><button data-bg="plain">Plain</button>
+  </div>
+</header>
+<main class="grid" id="grid"></main>
+<script src="helpers16.js"></script>
+<script>
+  const grid = document.getElementById("grid");
+  HELPERS16.list.forEach(k => {
+    const info = HELPERS16.info(k), card = document.createElement("article"); card.className = "card";
+    const st = document.createElement("div"); st.className = "stage doom";
+    const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; cv.setAttribute("aria-label", info.name);
+    cv.getContext("2d").drawImage(HELPERS16.build(k), 0, 0); st.appendChild(cv);
+    const h = document.createElement("h2"); h.textContent = info.name; const p = document.createElement("p"); p.textContent = info.blurb;
+    card.append(st, h, p); grid.appendChild(card);
+  });
+  document.querySelectorAll("[data-bg]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-bg]").forEach(x => x.setAttribute("aria-pressed", x === b)); document.querySelectorAll(".stage").forEach(s => s.className = "stage " + b.dataset.bg);
+  }));
+</script>
+</body>
+</html>
